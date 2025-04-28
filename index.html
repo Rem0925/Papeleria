@@ -107,9 +107,21 @@
            font-size: 0.875em;
            margin-top: 0.25rem;
        }
+
+       /* Style for the message area */
+       #message-area {
+           position: fixed; /* Fixed position */
+           top: 10px; /* 10px from the top */
+           right: 10px; /* 10px from the right */
+           z-index: 1050; /* Above modals */
+           min-width: 250px; /* Minimum width */
+           max-width: 90%; /* Maximum width */
+       }
     </style>
   </head>
   <body>
+    <div id="message-area"></div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="#">
@@ -292,6 +304,15 @@
                     </button>
                   </form>
                    <hr>
+                   <h6><i class="bi bi-upload me-2"></i>Importar Productos (CSV)</h6>
+                   <div class="mb-3">
+                       <label for="csv-file-input" class="form-label">Seleccionar archivo CSV</label>
+                       <input class="form-control" type="file" id="csv-file-input" accept=".csv">
+                   </div>
+                   <button id="import-csv-button" class="btn btn-success w-100" disabled>
+                       <i class="bi bi-file-earmark-arrow-up me-2"></i>Importar desde CSV
+                   </button>
+                   <hr>
                    <button id="clear-storage-button" class="btn btn-danger w-100 mt-3">
                        <i class="bi bi-trash me-2"></i>Limpiar Todos los Datos
                     </button>
@@ -344,9 +365,12 @@
                       <button id="filter-sales-button" class="btn btn-primary btn-sm me-2">
                           <i class="bi bi-filter"></i> Filtrar
                       </button>
-                       <button id="clear-sales-filter-button" class="btn btn-secondary btn-sm">
+                       <button id="clear-sales-filter-button" class="btn btn-secondary btn-sm me-2">
                           <i class="bi bi-x-circle"></i> Limpiar
                       </button>
+                       <button id="export-sales-button" class="btn btn-secondary btn-sm">
+                          <i class="bi bi-file-earmark-excel me-2"></i>Exportar Ventas (CSV)
+                       </button>
                   </div>
               </div>
             </div>
@@ -588,6 +612,7 @@
         const exchangeRateInput = document.getElementById("exchange-rate");
         const emptyBillMessage = document.getElementById("empty-bill-message");
         const processBillButton = document.getElementById('process-bill-button');
+        const messageArea = document.getElementById('message-area'); // Reference to the new message area
 
         // Filtering and Searching Elements
         const startDateInput = document.getElementById('start-date');
@@ -644,6 +669,14 @@
         const usdChangeUsdRadio = document.getElementById('usd-change-usd');
         const usdChangeVesRadio = document.getElementById('usd-change-ves');
 
+        // Export Buttons
+        const exportSalesButton = document.getElementById('export-sales-button');
+
+        // CSV Import Elements
+        const csvFileInput = document.getElementById('csv-file-input');
+        const importCsvButton = document.getElementById('import-csv-button');
+
+
         // Other Elements and Constants
         const LOW_STOCK_THRESHOLD = 5; // Threshold for highlighting low stock products
         const clearStorageButton = document.getElementById('clear-storage-button');
@@ -672,6 +705,7 @@
               // Reset to default state if parsing fails
               AppState = { products: [], sales: [], currentBill: [], exchangeRate: 85.40 };
               localStorage.removeItem("papeleriaData"); // Clear corrupted data
+              showMessage("Error al cargar los datos desde el almacenamiento local.", 'danger');
             }
           }
         }
@@ -682,9 +716,35 @@
             localStorage.setItem("papeleriaData", JSON.stringify(AppState));
           } catch (error) {
             console.error("Error saving data to localStorage:", error);
-            alert("Error al guardar los datos. El almacenamiento local podría estar lleno.");
+            showMessage("Error al guardar los datos. El almacenamiento local podría estar lleno.", 'danger');
           }
         }
+
+         // --- Message Display (UI/UX Improvement) ---
+
+        // Displays a message in the message area
+        function showMessage(message, type = 'success', duration = 5000) {
+            // Create a Bootstrap alert element
+            const alertElement = document.createElement('div');
+            alertElement.classList.add('alert', `alert-${type}`, 'alert-dismissible', 'fade', 'show');
+            alertElement.setAttribute('role', 'alert');
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            // Append the alert to the message area
+            messageArea.appendChild(alertElement);
+
+            // Automatically remove the alert after a duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                }, duration);
+            }
+        }
+
 
         // --- Price Calculation ---
 
@@ -862,7 +922,7 @@
                             <td>${sale.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
                             <td>${sale.totalUSD.toFixed(2)}$</td>
                             <td>${sale.totalBS.toFixed(0)}Bs</td>
-                            <td>${sale.paymentMethod || 'N/A'}</td>
+                            <td>${sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A'}</td>
                             <td>${sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A'}</td>
                             <td>${actualReceivedUSD.toFixed(2)}$</td>
                             <td>${actualReceivedBS.toFixed(0)}Bs</td>
@@ -883,12 +943,12 @@
 
           // Validation
           if (!name || isNaN(costUSD) || isNaN(stock) || costUSD < 0 || stock < 0) {
-              alert("Por favor, ingresa datos válidos para el producto (Nombre no vacío, Costo y Stock >= 0).");
+              showMessage("Por favor, ingresa datos válidos para el producto (Nombre no vacío, Costo y Stock >= 0).", 'warning');
               return;
           }
           // Check for duplicate product name (case-insensitive)
            if (AppState.products.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-               alert(`Ya existe un producto con el nombre "${name}".`);
+               showMessage(`Ya existe un producto con el nombre "${name}".`, 'warning');
                return;
            }
 
@@ -905,7 +965,7 @@
           saveData();
           renderProducts(productSearchInput.value);
           e.target.reset(); // Clear the form
-          alert("Producto guardado con éxito!");
+          showMessage("Producto guardado con éxito!", 'success');
         });
 
         // Deletes a product after confirmation (exposed globally for onclick)
@@ -913,20 +973,21 @@
           const productIndex = AppState.products.findIndex(p => p.id === id);
           if (productIndex === -1) {
               console.error("Producto no encontrado para eliminar:", id);
+              showMessage("Error: Producto no encontrado.", 'danger');
               return;
           }
           const productName = AppState.products[productIndex].name;
 
           // Check if product is in the current bill
           if (AppState.currentBill.some(item => item.id === id)) {
-              alert(`No se puede eliminar "${productName}" porque está en la factura actual. Quítalo de la factura primero.`);
+               showMessage(`No se puede eliminar "${productName}" porque está en la factura actual. Quítalo de la factura primero.`, 'warning');
               return;
           }
 
           // Optional: Add check for sales history if strict deletion is needed
           // const isInSales = AppState.sales.some(sale => sale.items.some(item => item.id === id));
           // if (isInSales) {
-          //     alert(`No se puede eliminar "${productName}" porque existe en el historial de ventas.`);
+          //     showMessage(`No se puede eliminar "${productName}" porque existe en el historial de ventas.`, 'warning');
           //     return;
           // }
 
@@ -935,7 +996,7 @@
               AppState.products.splice(productIndex, 1); // Remove product from array
               saveData();
               renderProducts(productSearchInput.value);
-              alert(`Producto "${productName}" eliminado.`);
+              showMessage(`Producto "${productName}" eliminado.`, 'success');
           }
         };
 
@@ -944,6 +1005,7 @@
             const productToEdit = AppState.products.find(p => p.id === id);
             if (!productToEdit) {
                 console.error("Producto no encontrado para editar:", id);
+                showMessage("Error: Producto no encontrado para editar.", 'danger');
                 return;
             }
 
@@ -967,13 +1029,13 @@
 
             // Validation
             if (!newName || isNaN(newCostUSD) || isNaN(newStock) || newCostUSD < 0 || newStock < 0) {
-                alert("Por favor, ingresa datos válidos para editar el producto (Nombre no vacío, Costo y Stock >= 0).");
+                showMessage("Por favor, ingresa datos válidos para editar el producto (Nombre no vacío, Costo y Stock >= 0).", 'warning');
                 return;
             }
 
             // Check for duplicate name (excluding the current product being edited)
             if (AppState.products.some(p => p.id !== productId && p.name.toLowerCase() === newName.toLowerCase())) {
-                alert(`Ya existe otro producto con el nombre "${newName}".`);
+                showMessage(`Ya existe otro producto con el nombre "${newName}".`, 'warning');
                 return;
             }
 
@@ -992,11 +1054,11 @@
                 renderProducts(productSearchInput.value); // Re-render product lists
                 updateBillDisplay(); // Update bill if the edited product is in it
                 renderSales(startDateInput.value, endDateInput.value); // Re-render sales in case price affects history display (unlikely but safe)
-                alert("Producto actualizado con éxito!");
+                showMessage("Producto actualizado con éxito!", 'success');
                 editProductModal.hide(); // Hide the modal
             } else {
                 console.error("Error al encontrar el producto para actualizar:", productId);
-                alert("Error al actualizar el producto.");
+                showMessage("Error al actualizar el producto.", 'danger');
             }
         });
 
@@ -1008,11 +1070,12 @@
 
           if (!product) {
             console.error("Producto no encontrado para agregar a la factura:", id);
+            showMessage("Error: Producto no encontrado para agregar a la factura.", 'danger');
             return;
           }
 
           if (product.stock <= 0) {
-            alert(`¡No hay más ${product.name} en stock!`);
+            showMessage(`¡No hay más ${product.name} en stock!`, 'warning');
             return;
           }
 
@@ -1059,6 +1122,7 @@
 
             if (!item || !product) {
                 console.error("Item o producto no encontrado para ajustar cantidad:", id);
+                showMessage("Error: Item o producto no encontrado.", 'danger');
                 return;
             }
 
@@ -1066,7 +1130,7 @@
 
             if (delta > 0) { // Increasing quantity
                 if (product.stock < delta) { // Use delta here, not 1, in case delta changes later
-                    alert(`No hay suficiente stock de "${product.name}" para añadir más.`);
+                    showMessage(`No hay suficiente stock de "${product.name}" para añadir más.`, 'warning');
                     return;
                 }
                 item.quantity = newQuantity;
@@ -1092,7 +1156,7 @@
         // Opens the payment modal when "Procesar Factura" is clicked
         processBillButton.addEventListener("click", () => {
              if (AppState.currentBill.length === 0) {
-                 alert("La factura está vacía. Agrega productos antes de procesar.");
+                 showMessage("La factura está vacía. Agrega productos antes de procesar.", 'warning');
                  return;
              }
 
@@ -1382,7 +1446,7 @@
              renderProducts(productSearchInput.value); // Update product stock display (already updated during bill modification)
 
              paymentModal.hide(); // Hide the payment modal
-             alert("Factura procesada con éxito!");
+             showMessage("Factura procesada con éxito!", 'success');
         });
 
 
@@ -1398,6 +1462,7 @@
             const sale = AppState.sales.find(s => s.date === saleDateISOString);
             if (!sale) {
                 console.error("Venta no encontrada:", saleDateISOString);
+                showMessage("Error: Venta no encontrada.", 'danger');
                 return;
             }
 
@@ -1434,6 +1499,193 @@
             saleDetailModal.show(); // Show the modal
         };
 
+        // --- Data Export Functions ---
+
+        // Helper function to escape CSV fields that contain commas or quotes
+        function escapeCsvField(field) {
+            if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
+                // Replace double quotes with two double quotes, then wrap in double quotes
+                return `"${field.replace(/"/g, '""')}"`;
+            }
+             // Convert numbers to string and handle potential null/undefined
+            if (field === null || field === undefined) return '';
+            return String(field);
+        }
+
+        // Generates and downloads a CSV file
+        function downloadCsv(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // Feature detection
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url); // Clean up
+            } else {
+                // Fallback for browsers that don't support download attribute
+                showMessage("Tu navegador no soporta la descarga automática. Por favor, copia el contenido manualmente.", 'warning');
+                console.log(csvContent); // Log content to console
+            }
+        }
+
+        // Exports sales data to CSV
+        exportSalesButton.addEventListener('click', () => {
+             const filteredSales = AppState.sales.filter(sale => {
+                const start = startDateInput.value ? new Date(startDateInput.value + 'T00:00:00') : null;
+                const end = endDateInput.value ? new Date(endDateInput.value + 'T23:59:59') : null;
+                const saleDate = new Date(sale.date);
+                let isWithinRange = true;
+                if (start && saleDate < start) isWithinRange = false;
+                if (end && saleDate > end) isWithinRange = false;
+                return isWithinRange;
+            });
+
+            if (filteredSales.length === 0) {
+                showMessage("No hay ventas para exportar en el rango de fechas seleccionado.", 'info');
+                return;
+            }
+
+            const header = [
+                "Fecha", "Productos", "Cantidad Total", "Total Venta ($)", "Total Venta (Bs)",
+                "Método de Pago", "Tasa Cambio", "Recibido Cliente ($)", "Recibido Cliente (Bs)",
+                "Vuelto Entregado ($)", "Vuelto Entregado (Bs)", "Recibido Neto ($)", "Recibido Neto (Bs)"
+            ];
+
+            const rows = filteredSales.map(sale => {
+                 const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; "); // Use semicolon for item separation within cell
+                 const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+                 const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
+                 const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
+
+                return [
+                    escapeCsvField(new Date(sale.date).toLocaleString('es-VE')),
+                    escapeCsvField(itemsSummary),
+                    escapeCsvField(totalQuantity),
+                    escapeCsvField(sale.totalUSD.toFixed(2)),
+                    escapeCsvField(sale.totalBS.toFixed(0)),
+                    escapeCsvField(sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A'),
+                    escapeCsvField(sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A'),
+                    escapeCsvField((sale.receivedUSD_customer || 0).toFixed(0)),
+                    escapeCsvField((sale.receivedBS_customer || 0).toFixed(0)),
+                    escapeCsvField((sale.changeGivenUSD || 0).toFixed(2)),
+                    escapeCsvField(Math.round(sale.changeGivenBS || 0).toFixed(0)),
+                    escapeCsvField(actualReceivedUSD.toFixed(2)),
+                    escapeCsvField(Math.round(actualReceivedBS).toFixed(0))
+                ].join(',');
+            });
+
+            const csvContent = [header.join(','), ...rows].join('\n');
+            const filename = `ventas_papeleria_${startDateInput.value || 'inicio'}_${endDateInput.value || 'fin'}.csv`;
+            downloadCsv(csvContent, filename);
+            showMessage("Ventas exportadas a CSV.", 'success');
+        });
+
+
+        // --- CSV Import Functionality ---
+
+        // Enable the import button when a file is selected
+        csvFileInput.addEventListener('change', (event) => {
+            if (event.target.files.length > 0) {
+                importCsvButton.disabled = false;
+            } else {
+                importCsvButton.disabled = true;
+            }
+        });
+
+        // Handle the CSV import button click
+        importCsvButton.addEventListener('click', () => {
+            const file = csvFileInput.files[0];
+            if (!file) {
+                showMessage("Por favor, selecciona un archivo CSV.", 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                const csvContent = event.target.result;
+                processCsvData(csvContent);
+            };
+
+            reader.onerror = () => {
+                showMessage("Error al leer el archivo CSV.", 'danger');
+            };
+
+            reader.readAsText(file); // Read the file as text
+        });
+
+        // Process the CSV data
+        function processCsvData(csvContent) {
+            const lines = csvContent.split('\n').filter(line => line.trim() !== ''); // Split into lines and remove empty ones
+            let addedCount = 0;
+            let updatedCount = 0;
+            let skippedCount = 0;
+
+            if (lines.length === 0) {
+                showMessage("El archivo CSV está vacío.", 'info');
+                return;
+            }
+
+            // Simple CSV parsing: assuming format "Nombre,Costo,Existencia"
+            lines.forEach((line, index) => {
+                const columns = line.split(',');
+
+                // Basic validation: check if there are 3 columns
+                if (columns.length !== 3) {
+                    console.warn(`Fila ${index + 1} saltada: Número incorrecto de columnas (${columns.length}).`);
+                    skippedCount++;
+                    return; // Skip this row
+                }
+
+                const name = columns[0].trim();
+                const costUSD = parseFloat(columns[1].trim());
+                const stock = parseInt(columns[2].trim());
+
+                // Validate data types and values
+                if (!name || isNaN(costUSD) || isNaN(stock) || costUSD < 0 || stock < 0) {
+                     console.warn(`Fila ${index + 1} saltada: Datos inválidos (Nombre: "${name}", Costo: ${columns[1]}, Stock: ${columns[2]}).`);
+                    skippedCount++;
+                    return; // Skip this row
+                }
+
+                // Check if product with the same name already exists (case-insensitive)
+                const existingProductIndex = AppState.products.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+
+                if (existingProductIndex !== -1) {
+                    // Product exists, update cost and stock
+                    AppState.products[existingProductIndex].costUSD = costUSD;
+                    AppState.products[existingProductIndex].stock = stock;
+                    updatedCount++;
+                } else {
+                    // Product does not exist, add as new
+                    const newProduct = {
+                        id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, // Unique ID
+                        name: name,
+                        costUSD: costUSD,
+                        stock: stock,
+                    };
+                    AppState.products.push(newProduct);
+                    addedCount++;
+                }
+            });
+
+            AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Keep products sorted
+            saveData();
+            renderProducts(productSearchInput.value); // Re-render UI
+
+            // Show summary message
+            showMessage(`Importación de CSV completada: ${addedCount} productos añadidos, ${updatedCount} productos actualizados, ${skippedCount} filas saltadas.`, 'success');
+
+            // Reset file input
+            csvFileInput.value = '';
+            importCsvButton.disabled = true;
+        }
+
+
         // --- General Event Listeners ---
 
         // Updates exchange rate and recalculates prices when input changes
@@ -1446,11 +1698,13 @@
             renderProducts(productSearchInput.value);
             updateBillDisplay();
             renderSales(startDateInput.value, endDateInput.value); // Re-render sales as BS totals might change display slightly
+            showMessage("Tasa de cambio actualizada.", 'info', 3000); // Short duration message
           } else {
               // Provide feedback without alert if possible, maybe input validation styling
               // console.warn("Tasa de cambio inválida ingresada.");
               // Optionally reset to the last valid rate if input becomes invalid
               // e.target.value = AppState.exchangeRate.toFixed(2);
+              showMessage("Por favor, ingresa una tasa de cambio válida.", 'warning', 3000);
           }
         });
          // Prevent non-numeric input in exchange rate
@@ -1469,6 +1723,7 @@
         // Applies date filters to the sales history
         filterSalesButton.addEventListener('click', () => {
             renderSales(startDateInput.value, endDateInput.value);
+             showMessage("Filtro de ventas aplicado.", 'info', 3000);
         });
 
         // Clears date filters and shows all sales
@@ -1476,6 +1731,7 @@
             startDateInput.value = '';
             endDateInput.value = '';
             renderSales(); // Render all sales
+            showMessage("Filtro de ventas limpiado.", 'info', 3000);
         });
 
         // Clears all data from localStorage after confirmation
@@ -1499,7 +1755,7 @@
                         productSearchInput.value = ''; // Clear search
                         startDateInput.value = ''; // Clear date filters
                         endDateInput.value = '';
-                        alert('Todos los datos han sido eliminados permanentemente.');
+                        showMessage('Todos los datos han sido eliminados permanentemente.', 'success');
                     }
                 }
             });
