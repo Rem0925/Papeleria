@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Papelería Manager</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --background-color: #f8fafc;
+        --text-color: #1e293b;
+      }
+
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      /* Using Bootstrap's .active class directly now */
+      .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+        border-color: var(--primary-color) !important; /* Ensure border color is primary */
+      }
+
+      .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .total-display {
+        background: var(--primary-color);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+      }
+
+      .bill-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Align items vertically */
+        padding: 8px 0; /* Increased padding */
+        border-bottom: 1px dashed #ccc;
+      }
+
+      .bill-item:last-child {
+        border-bottom: none;
+      }
+
+      .bill-item .quantity-controls {
+          display: flex;
+          align-items: center;
+      }
+
+       .bill-item .quantity-controls button {
+           padding: 0 6px; /* Smaller padding for quantity buttons */
+           font-size: 0.8rem;
+           line-height: 1; /* Adjust line height */
+       }
+
+       .bill-item .quantity-controls span {
+           margin: 0 8px; /* Space between buttons and quantity */
+           font-weight: bold;
+       }
+
+
+      /* CSS for the hidden mixed payment div */
+      .hidden {
+        display: none;
+      }
+
+      /* Style for low stock products */
+      .low-stock {
+          background-color: #fef3c7; /* Light yellow background */
+      }
+
+      /* Style for clickable table rows */
+      .clickable-row {
+          cursor: pointer;
+      }
+
+      .clickable-row:hover {
+          background-color: #e9ecef; /* Light grey on hover */
+      }
+
+       /* Style for sale detail modal item list */
+       #sale-detail-items .list-group-item {
+           display: flex;
+           justify-content: space-between;
+       }
+
+       /* Style for error messages in modal */
+       .payment-error {
+           color: #dc3545; /* Bootstrap danger color */
+           font-size: 0.875em;
+           margin-top: 0.25rem;
+       }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+          <i class="bi bi-shop-window me-2"></i>Papelería
+        </a>
+        <div class="d-flex align-items-center">
+          <div class="exchange-rate-container bg-white p-2 rounded me-3">
+            $1 =
+            <input
+              type="number"
+              id="exchange-rate"
+              value="85.40"
+              step="0.01"
+              style="width: 80px"
+              class="form-control form-control-sm d-inline-block"
+            />
+            Bs
+          </div>
+          </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+      <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="home-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#home"
+            type="button"
+            role="tab"
+            aria-controls="home"
+            aria-selected="true"
+          >
+            Principal
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="products-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#products"
+            type="button"
+            role="tab"
+            aria-controls="products"
+            aria-selected="false"
+          >
+            Productos
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="sales-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#sales"
+            type="button"
+            role="tab"
+            aria-controls="sales"
+            aria-selected="false"
+          >
+            Ventas
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="myTabContent">
+        <div
+          class="tab-pane fade show active"
+          id="home"
+          role="tabpanel"
+          aria-labelledby="home-tab"
+        >
+          <div class="row g-4">
+            <div class="col-lg-8">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <div class="d-flex justify-content-between align-items-center">
+                     <h5><i class="bi bi-box-seam me-2"></i>Inventario Actual</h5>
+                     <div class="col-md-4">
+                         <input type="text" id="product-search" class="form-control form-control-sm" placeholder="Buscar producto...">
+                     </div>
+                  </div>
+                </div>
+                <div class="table-responsive" style="max-height: 500px">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th>Precio $</th>
+                        <th>Precio Bs</th>
+                        <th>Existencia</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="products-list">
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card h-100">
+                <div class="card-header bg-white">
+                  <h5><i class="bi bi-cart-check me-2"></i>Factura Actual</h5>
+                </div>
+                <div class="card-body">
+                  <div id="current-bill-items" class="mb-3">
+                    <p id="empty-bill-message" class="text-muted">
+                      La factura está vacía. Agrega productos del inventario.
+                    </p>
+                    </div>
+                  <div class="total-display text-center mb-3">
+                    Total: <span id="total-display">0.00$ | 0.00Bs</span>
+                  </div>
+                  <button
+                    class="btn btn-primary w-100"
+                    id="process-bill-button"
+                    disabled >
+                    <i class="bi bi-receipt-cutoff me-2"></i>Procesar Factura
+                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="tab-pane fade"
+          id="products"
+          role="tabpanel"
+          aria-labelledby="products-tab"
+        >
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <h5><i class="bi bi-plus-circle me-2"></i>Nuevo Producto</h5>
+                </div>
+                <div class="card-body">
+                  <form id="new-product-form">
+                    <div class="mb-3">
+                      <label for="product-name" class="form-label">Nombre del Producto</label>
+                      <input
+                        type="text"
+                        id="product-name"
+                        class="form-control"
+                        placeholder="Ej: Bolígrafo Azul"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                       <label for="product-price" class="form-label">Costo en $ (Precio de compra)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="product-price"
+                        class="form-control"
+                        placeholder="Ej: 0.50"
+                        required
+                        min="0"
+                      />
+                    </div>
+                    <div class="mb-3">
+                       <label for="product-stock" class="form-label">Cantidad Inicial (Stock)</label>
+                      <input
+                        type="number"
+                        id="product-stock"
+                        class="form-control"
+                        placeholder="Ej: 100"
+                        required
+                        min="0"
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="bi bi-save me-2"></i>Guardar Producto
+                    </button>
+                  </form>
+                   <hr>
+                   <button id="clear-storage-button" class="btn btn-danger w-100 mt-3">
+                       <i class="bi bi-trash me-2"></i>Limpiar Todos los Datos
+                    </button>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <h5><i class="bi bi-boxes me-2"></i>Administrar Productos</h5>
+                </div>
+                <div class="table-responsive" style="max-height: 600px">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th>Costo $</th>
+                        <th>Precio Venta $</th>
+                        <th>Precio Venta Bs</th>
+                        <th>Existencia</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="products-management-list">
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="tab-pane fade"
+          id="sales"
+          role="tabpanel"
+          aria-labelledby="sales-tab"
+        >
+          <div class="card">
+            <div class="card-header bg-white">
+              <div class="d-flex justify-content-between align-items-center">
+                  <h5><i class="bi bi-graph-up me-2"></i>Historial de Ventas</h5>
+                  <div class="d-flex align-items-center">
+                      <label for="start-date" class="form-label me-2 mb-0">Desde:</label>
+                      <input type="date" id="start-date" class="form-control form-control-sm me-2">
+                      <label for="end-date" class="form-label me-2 mb-0">Hasta:</label>
+                      <input type="date" id="end-date" class="form-control form-control-sm me-2">
+                      <button id="filter-sales-button" class="btn btn-primary btn-sm me-2">
+                          <i class="bi bi-filter"></i> Filtrar
+                      </button>
+                       <button id="clear-sales-filter-button" class="btn btn-secondary btn-sm">
+                          <i class="bi bi-x-circle"></i> Limpiar
+                      </button>
+                  </div>
+              </div>
+            </div>
+            <div class="card-body">
+                 <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="alert alert-info py-2 mb-0">
+                            Total Ventas ($): <strong id="total-sales-usd">0.00$</strong>
+                        </div>
+                    </div>
+                     <div class="col-md-6">
+                        <div class="alert alert-info py-2 mb-0">
+                            Total Ventas (Bs): <strong id="total-sales-bs">0.00Bs</strong>
+                        </div>
+                    </div>
+                </div>
+                 <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="alert alert-success py-2 mb-0">
+                            Total Recibido Neto ($): <strong id="total-received-usd">0.00$</strong>
+                        </div>
+                    </div>
+                     <div class="col-md-6">
+                        <div class="alert alert-success py-2 mb-0">
+                            Total Recibido Neto (Bs): <strong id="total-received-bs">0.00Bs</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 400px"> <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Productos</th>
+                        <th>Cantidad Total</th>
+                        <th>Total Venta $</th>
+                        <th>Total Venta Bs</th>
+                        <th>Método de Pago</th>
+                        <th>Tasa Cambio</th>
+                        <th>Recibido Neto $</th>
+                        <th>Recibido Neto Bs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-history">
+                      </tbody>
+                  </table>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="editProductModal"
+      tabindex="-1"
+      aria-labelledby="editProductModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editProductModalLabel">
+              <i class="bi bi-pencil-square me-2"></i>Editar Producto
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="edit-product-form">
+              <input type="hidden" id="edit-product-id">
+              <div class="mb-3">
+                <label for="edit-product-name" class="form-label">Nombre del Producto</label>
+                <input type="text" id="edit-product-name" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                 <label for="edit-product-price" class="form-label">Costo en $ (Precio de compra)</label>
+                <input type="number" step="0.01" id="edit-product-price" class="form-control" required min="0">
+              </div>
+              <div class="mb-3">
+                 <label for="edit-product-stock" class="form-label">Cantidad (Stock)</label>
+                <input type="number" id="edit-product-stock" class="form-control" required min="0">
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-save me-2"></i>Guardar Cambios
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="saleDetailModal"
+      tabindex="-1"
+      aria-labelledby="saleDetailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="saleDetailModalLabel">
+              <i class="bi bi-journal-text me-2"></i>Detalle de Venta
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+              <p><strong>Fecha:</strong> <span id="sale-detail-date"></span></p>
+              <p><strong>Método de Pago:</strong> <span id="sale-detail-method"></span></p>
+               <p><strong>Monto Recibido (Cliente):</strong> <span id="sale-detail-received-customer"></span></p>
+               <p><strong>Vuelto Entregado:</strong> <span id="sale-detail-change-given"></span></p>
+               <p><strong>Monto Recibido Neto:</strong> <span id="sale-detail-received-net"></span></p>
+               <p><strong>Total Venta:</strong> <span id="sale-detail-total"></span></p>
+              <p><strong>Tasa de Cambio:</strong> <span id="sale-detail-exchange-rate"></span> Bs/$</p>
+              <h6>Productos:</h6>
+              <ul id="sale-detail-items" class="list-group">
+                  </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="paymentModal"
+      tabindex="-1"
+      aria-labelledby="paymentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="paymentModalLabel">
+              <i class="bi bi-cash-coin me-2"></i>Procesar Pago
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+                <strong>Total a Pagar:</strong>
+                <span id="payment-modal-total-usd"></span>
+                <span id="payment-modal-total-bs"></span>
+            </div>
+
+            <div class="mb-3">
+                <label for="payment-method" class="form-label">Método de Pago</label>
+                <select class="form-select" id="payment-method">
+                    <option value="usd">USD</option>
+                    <option value="ves">VES</option>
+                    <option value="mixed">Mixto</option>
+                </select>
+            </div>
+
+            <div id="usd-payment-section">
+                <div class="mb-3">
+                    <label for="amount-received-usd" class="form-label">Monto Recibido ($)</label>
+                    <input type="number" id="amount-received-usd" class="form-control" placeholder="Solo números enteros" min="0">
+                    <div id="amount-received-usd-error" class="payment-error"></div> </div>
+                 <div id="usd-change-options" class="mb-3 hidden">
+                    <label class="form-label">Devolver Vuelto en:</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="usd-change-currency" id="usd-change-usd" value="usd" checked>
+                            <label class="form-check-label" for="usd-change-usd">USD</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="usd-change-currency" id="usd-change-ves" value="ves">
+                            <label class="form-check-label" for="usd-change-ves">VES</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ves-payment-section" class="hidden">
+                <div class="mb-3">
+                    <label for="amount-received-ves" class="form-label">Monto Recibido (Bs)</label>
+                    <input type="number" id="amount-received-ves" class="form-control" placeholder="Solo números enteros" min="0">
+                     <div id="amount-received-ves-error" class="payment-error"></div> </div>
+            </div>
+
+            <div id="mixed-payment-section" class="hidden">
+                 <div class="mb-3">
+                    <label for="amount-received-mixed-usd" class="form-label">Monto Recibido USD ($)</label>
+                    <input type="number" id="amount-received-mixed-usd" class="form-control" placeholder="Solo números enteros" min="0">
+                     <div id="amount-received-mixed-usd-error" class="payment-error"></div> </div>
+                 <div class="mb-3">
+                    <label for="amount-received-mixed-ves" class="form-label">Monto Recibido VES (Bs)</label>
+                    <input type="number" id="amount-received-mixed-ves" class="form-control" placeholder="Solo números enteros" min="0">
+                     <div id="amount-received-mixed-ves-error" class="payment-error"></div> </div>
+            </div>
+
+            <div id="payment-results" class="mt-4">
+                <p id="payment-status"></p>
+                <p id="payment-change"></p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="confirm-payment-button" disabled>Confirmar Pago</button> </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Ensure JS runs after DOM is fully loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- Global State ---
+        let AppState = {
+          products: [], // Array to store product objects {id, name, costUSD, stock}
+          sales: [],    // Array to store sale objects {date, items, totalUSD, totalBS, paymentMethod, ...}
+          currentBill: [], // Array to store items currently in the bill {id, name, costUSD, quantity}
+          exchangeRate: 85.40, // Default exchange rate
+        };
+
+        // --- DOM Element References ---
+        const productsList = document.getElementById("products-list"); // Home tab product list
+        const managementList = document.getElementById("products-management-list"); // Products tab management list
+        const currentBillItemsDiv = document.getElementById("current-bill-items");
+        const totalDisplaySpan = document.getElementById("total-display");
+        const salesHistoryTbody = document.getElementById("sales-history");
+        const newProductForm = document.getElementById("new-product-form");
+        const exchangeRateInput = document.getElementById("exchange-rate");
+        const emptyBillMessage = document.getElementById("empty-bill-message");
+        const processBillButton = document.getElementById('process-bill-button');
+
+        // Filtering and Searching Elements
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const filterSalesButton = document.getElementById('filter-sales-button');
+        const clearSalesFilterButton = document.getElementById('clear-sales-filter-button');
+        const productSearchInput = document.getElementById('product-search');
+
+        // Edit Product Modal Elements
+        const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+        const editProductForm = document.getElementById('edit-product-form');
+        const editProductIdInput = document.getElementById('edit-product-id');
+        const editProductNameInput = document.getElementById('edit-product-name');
+        const editProductPriceInput = document.getElementById('edit-product-price'); // This is cost
+        const editProductStockInput = document.getElementById('edit-product-stock');
+
+        // Sale Detail Modal Elements
+        const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
+        const saleDetailDateSpan = document.getElementById('sale-detail-date');
+        const saleDetailMethodSpan = document.getElementById('sale-detail-method');
+        const saleDetailTotalSpan = document.getElementById('sale-detail-total');
+        const saleDetailItemsList = document.getElementById('sale-detail-items');
+        const saleDetailReceivedCustomerSpan = document.getElementById('sale-detail-received-customer');
+        const saleDetailExchangeRateSpan = document.getElementById('sale-detail-exchange-rate');
+        const saleDetailChangeGivenSpan = document.getElementById('sale-detail-change-given');
+        const saleDetailReceivedNetSpan = document.getElementById('sale-detail-received-net');
+
+        // Sales Report Summary Elements
+        const totalSalesUsdSpan = document.getElementById('total-sales-usd');
+        const totalSalesBsSpan = document.getElementById('total-sales-bs');
+        const totalReceivedUsdSpan = document.getElementById('total-received-usd');
+        const totalReceivedBsSpan = document.getElementById('total-received-bs');
+
+        // Payment Modal Elements
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        const paymentModalTotalUsdSpan = document.getElementById('payment-modal-total-usd');
+        const paymentModalTotalBsSpan = document.getElementById('payment-modal-total-bs');
+        const paymentMethodSelect = document.getElementById('payment-method');
+        const usdPaymentSection = document.getElementById('usd-payment-section');
+        const vesPaymentSection = document.getElementById('ves-payment-section');
+        const mixedPaymentSection = document.getElementById('mixed-payment-section');
+        const amountReceivedUsdInput = document.getElementById('amount-received-usd');
+        const amountReceivedVesInput = document.getElementById('amount-received-ves');
+        const amountReceivedMixedUsdInput = document.getElementById('amount-received-mixed-usd');
+        const amountReceivedMixedVesInput = document.getElementById('amount-received-mixed-ves');
+        const amountReceivedUsdError = document.getElementById('amount-received-usd-error');
+        const amountReceivedVesError = document.getElementById('amount-received-ves-error');
+        const amountReceivedMixedUsdError = document.getElementById('amount-received-mixed-usd-error');
+        const amountReceivedMixedVesError = document.getElementById('amount-received-mixed-ves-error');
+        const paymentStatusP = document.getElementById('payment-status');
+        const paymentChangeP = document.getElementById('payment-change');
+        const confirmPaymentButton = document.getElementById('confirm-payment-button');
+        const usdChangeOptionsDiv = document.getElementById('usd-change-options');
+        const usdChangeUsdRadio = document.getElementById('usd-change-usd');
+        const usdChangeVesRadio = document.getElementById('usd-change-ves');
+
+        // Other Elements and Constants
+        const LOW_STOCK_THRESHOLD = 5; // Threshold for highlighting low stock products
+        const clearStorageButton = document.getElementById('clear-storage-button');
+
+        // Variables to store current bill totals for the payment modal
+        let currentBillTotalUSD = 0;
+        let currentBillTotalBS = 0;
+
+
+        // --- Data Persistence ---
+
+        // Loads data from localStorage on application start
+        function loadData() {
+          const savedData = localStorage.getItem("papeleriaData");
+          if (savedData) {
+            try {
+              AppState = JSON.parse(savedData);
+              // Ensure arrays exist and exchange rate is a number
+              AppState.products = Array.isArray(AppState.products) ? AppState.products : [];
+              AppState.sales = Array.isArray(AppState.sales) ? AppState.sales : [];
+              AppState.currentBill = Array.isArray(AppState.currentBill) ? AppState.currentBill : [];
+              AppState.exchangeRate = typeof AppState.exchangeRate === 'number' ? AppState.exchangeRate : 85.40;
+              exchangeRateInput.value = AppState.exchangeRate.toFixed(2); // Update input display
+            } catch (error) {
+              console.error("Error parsing data from localStorage:", error);
+              // Reset to default state if parsing fails
+              AppState = { products: [], sales: [], currentBill: [], exchangeRate: 85.40 };
+              localStorage.removeItem("papeleriaData"); // Clear corrupted data
+            }
+          }
+        }
+
+        // Saves the current AppState to localStorage
+        function saveData() {
+          try {
+            localStorage.setItem("papeleriaData", JSON.stringify(AppState));
+          } catch (error) {
+            console.error("Error saving data to localStorage:", error);
+            alert("Error al guardar los datos. El almacenamiento local podría estar lleno.");
+          }
+        }
+
+        // --- Price Calculation ---
+
+        // Calculates sale price (30% profit on cost) and converts to BS
+        function calculatePrices(product) {
+          const costUSD = product.costUSD;
+          if (typeof costUSD !== "number" || costUSD < 0) {
+            console.error("Costo inválido para calcular precios:", product);
+            return { priceUSD: 0, priceBS: 0 };
+          }
+
+          const salePriceUSD = costUSD * 1.3; // 30% profit margin
+          let salePriceBS = salePriceUSD * AppState.exchangeRate;
+
+          // Round Bolivar price: up if decimal >= 0.30, down otherwise
+          const decimalPart = salePriceBS % 1;
+          salePriceBS = decimalPart >= 0.30 ? Math.ceil(salePriceBS) : Math.floor(salePriceBS);
+
+          return {
+            priceUSD: Number(salePriceUSD.toFixed(2)), // Keep USD with 2 decimals
+            priceBS: Number(salePriceBS.toFixed(0)),   // Round BS to integer
+          };
+        }
+
+        // --- Rendering Functions ---
+
+        // Renders the product list on the main tab (filtered) and management tab (all)
+        function renderProducts(searchTerm = '') {
+          const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+          // Filter products for the Home tab (only show in-stock items)
+          const homeFilteredProducts = AppState.products.filter(product =>
+            product.stock > 0 && product.name.toLowerCase().includes(lowerCaseSearchTerm)
+          );
+
+          productsList.innerHTML = homeFilteredProducts.length > 0
+            ? homeFilteredProducts.map(product => {
+                const prices = calculatePrices(product);
+                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
+                return `
+                  <tr class="${rowClass}">
+                      <td>${product.name}</td>
+                      <td>${prices.priceUSD.toFixed(2)}$</td>
+                      <td>${prices.priceBS.toFixed(0)}Bs</td>
+                      <td>${product.stock}</td>
+                      <td>
+                          <button class="btn btn-sm btn-primary" onclick="addToBill('${product.id}')">
+                              <i class="bi bi-cart-plus"></i> Agregar
+                          </button>
+                      </td>
+                  </tr>`;
+              }).join("")
+            : `<tr><td colspan="5" class="text-center text-muted">No se encontraron productos ${searchTerm ? 'con ese nombre' : ''}.</td></tr>`;
+
+
+          // Render all products for the Management tab
+          managementList.innerHTML = AppState.products.length > 0
+            ? AppState.products.map(product => {
+                const prices = calculatePrices(product);
+                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
+                return `
+                  <tr class="${rowClass}">
+                      <td>${product.name}</td>
+                      <td>${product.costUSD.toFixed(2)}$</td>
+                      <td>${prices.priceUSD.toFixed(2)}$</td>
+                      <td>${prices.priceBS.toFixed(0)}Bs</td>
+                      <td>${product.stock}</td>
+                      <td>
+                          <button class="btn btn-sm btn-warning me-2" onclick="editProduct('${product.id}')">
+                              <i class="bi bi-pencil"></i> Editar
+                          </button>
+                          <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}')">
+                              <i class="bi bi-trash"></i> Eliminar
+                          </button>
+                      </td>
+                  </tr>`;
+              }).join("")
+            : `<tr><td colspan="6" class="text-center text-muted">No hay productos registrados.</td></tr>`;
+        }
+
+        // Updates the display of the current bill and its total
+        function updateBillDisplay() {
+          currentBillTotalUSD = 0;
+          currentBillTotalBS = 0;
+
+          if (AppState.currentBill.length === 0) {
+            currentBillItemsDiv.innerHTML = `<p id="empty-bill-message" class="text-muted">La factura está vacía. Agrega productos del inventario.</p>`;
+            emptyBillMessage.style.display = 'block'; // Show empty message
+          } else {
+             emptyBillMessage.style.display = 'none'; // Hide empty message
+             currentBillItemsDiv.innerHTML = AppState.currentBill.map(item => {
+                const product = AppState.products.find(p => p.id === item.id);
+                // Ensure product exists before calculating price (should always exist if added correctly)
+                const prices = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0 };
+                const subtotalUSD = prices.priceUSD * item.quantity;
+                const subtotalBS = prices.priceBS * item.quantity;
+                currentBillTotalUSD += subtotalUSD;
+                currentBillTotalBS += subtotalBS;
+
+                return `
+                    <div class="bill-item">
+                        <div>${item.name}</div>
+                         <div class="quantity-controls">
+                             <button class="btn btn-sm btn-secondary" onclick="adjustBillQuantity('${item.id}', -1)">-</button>
+                             <span>${item.quantity}</span>
+                             <button class="btn btn-sm btn-secondary me-2" onclick="adjustBillQuantity('${item.id}', 1)">+</button>
+                             <button class="btn btn-sm btn-danger" onclick="removeFromBill('${item.id}')">
+                                 <i class="bi bi-x"></i>
+                             </button>
+                         </div>
+                        <div>${subtotalUSD.toFixed(2)}$ | ${subtotalBS.toFixed(0)}Bs</div>
+                    </div>`;
+              }).join("");
+          }
+
+          totalDisplaySpan.textContent = `${currentBillTotalUSD.toFixed(2)}$ | ${currentBillTotalBS.toFixed(0)}Bs`;
+          checkBillAndToggleFacturarButton(); // Update button state
+        }
+
+        // Renders the sales history table, optionally filtered by date, and calculates summary totals
+        function renderSales(startDate = null, endDate = null) {
+            let filteredSales = AppState.sales;
+
+            // Apply date filtering if dates are provided
+            if (startDate || endDate) {
+                const start = startDate ? new Date(startDate + 'T00:00:00') : null; // Set time to start of day
+                const end = endDate ? new Date(endDate + 'T23:59:59') : null;     // Set time to end of day
+
+                filteredSales = AppState.sales.filter(sale => {
+                    const saleDate = new Date(sale.date);
+                    let isWithinRange = true;
+                    if (start && saleDate < start) isWithinRange = false;
+                    if (end && saleDate > end) isWithinRange = false;
+                    return isWithinRange;
+                });
+            }
+
+            // Calculate Sales Summary for the filtered sales
+            let totalFilteredSalesUSD = 0;
+            let totalFilteredSalesBS = 0;
+            let totalReceivedNetUSD = 0;
+            let totalReceivedNetBS = 0;
+
+            filteredSales.forEach(sale => {
+                totalFilteredSalesUSD += sale.totalUSD;
+                totalFilteredSalesBS += sale.totalBS;
+
+                // Calculate net received for summary using stored values
+                const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
+                const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
+                totalReceivedNetUSD += actualReceivedUSD;
+                totalReceivedNetBS += actualReceivedBS;
+            });
+
+            // Update summary display
+            totalSalesUsdSpan.textContent = `${totalFilteredSalesUSD.toFixed(2)}$`;
+            totalSalesBsSpan.textContent = `${totalFilteredSalesBS.toFixed(0)}Bs`;
+            totalReceivedUsdSpan.textContent = `${totalReceivedNetUSD.toFixed(2)}$`;
+            totalReceivedBsSpan.textContent = `${totalReceivedNetBS.toFixed(0)}Bs`;
+
+            // Render the sales history table
+            if (filteredSales.length === 0) {
+             salesHistoryTbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No hay ventas registradas${(startDate || endDate) ? ' para este rango de fechas' : ''}.</td></tr>`;
+            } else {
+             salesHistoryTbody.innerHTML = filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending by date
+               .map(sale => {
+                    // Calculate net received for this specific row display
+                    const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
+                    const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
+
+                    return `
+                        <tr class="clickable-row" onclick="viewSaleDetail('${sale.date}')">
+                            <td>${new Date(sale.date).toLocaleDateString()} ${new Date(sale.date).toLocaleTimeString()}</td>
+                            <td>${sale.items.map(item => `${item.name} (x${item.quantity})`).join(", ")}</td>
+                            <td>${sale.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                            <td>${sale.totalUSD.toFixed(2)}$</td>
+                            <td>${sale.totalBS.toFixed(0)}Bs</td>
+                            <td>${sale.paymentMethod || 'N/A'}</td>
+                            <td>${sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A'}</td>
+                            <td>${actualReceivedUSD.toFixed(2)}$</td>
+                            <td>${actualReceivedBS.toFixed(0)}Bs</td>
+                        </tr>
+                    `;
+                }).join("");
+            }
+        }
+
+        // --- Product Actions ---
+
+        // Handles the submission of the new product form
+        newProductForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("product-name").value.trim();
+          const costUSD = parseFloat(document.getElementById("product-price").value);
+          const stock = parseInt(document.getElementById("product-stock").value);
+
+          // Validation
+          if (!name || isNaN(costUSD) || isNaN(stock) || costUSD < 0 || stock < 0) {
+              alert("Por favor, ingresa datos válidos para el producto (Nombre no vacío, Costo y Stock >= 0).");
+              return;
+          }
+          // Check for duplicate product name (case-insensitive)
+           if (AppState.products.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+               alert(`Ya existe un producto con el nombre "${name}".`);
+               return;
+           }
+
+
+          const newProduct = {
+            id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, // More robust unique ID
+            name: name,
+            costUSD: costUSD,
+            stock: stock,
+          };
+
+          AppState.products.push(newProduct);
+          AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Keep products sorted alphabetically
+          saveData();
+          renderProducts(productSearchInput.value);
+          e.target.reset(); // Clear the form
+          alert("Producto guardado con éxito!");
+        });
+
+        // Deletes a product after confirmation (exposed globally for onclick)
+        window.deleteProduct = function (id) {
+          const productIndex = AppState.products.findIndex(p => p.id === id);
+          if (productIndex === -1) {
+              console.error("Producto no encontrado para eliminar:", id);
+              return;
+          }
+          const productName = AppState.products[productIndex].name;
+
+          // Check if product is in the current bill
+          if (AppState.currentBill.some(item => item.id === id)) {
+              alert(`No se puede eliminar "${productName}" porque está en la factura actual. Quítalo de la factura primero.`);
+              return;
+          }
+
+          // Optional: Add check for sales history if strict deletion is needed
+          // const isInSales = AppState.sales.some(sale => sale.items.some(item => item.id === id));
+          // if (isInSales) {
+          //     alert(`No se puede eliminar "${productName}" porque existe en el historial de ventas.`);
+          //     return;
+          // }
+
+
+          if (confirm(`¿Estás seguro de que deseas eliminar el producto "${productName}"? Esta acción no se puede deshacer.`)) {
+              AppState.products.splice(productIndex, 1); // Remove product from array
+              saveData();
+              renderProducts(productSearchInput.value);
+              alert(`Producto "${productName}" eliminado.`);
+          }
+        };
+
+        // Opens the edit product modal and populates it (exposed globally for onclick)
+        window.editProduct = function(id) {
+            const productToEdit = AppState.products.find(p => p.id === id);
+            if (!productToEdit) {
+                console.error("Producto no encontrado para editar:", id);
+                return;
+            }
+
+            // Populate the modal form
+            editProductIdInput.value = productToEdit.id;
+            editProductNameInput.value = productToEdit.name;
+            editProductPriceInput.value = productToEdit.costUSD.toFixed(2); // Populate with cost, formatted
+            editProductStockInput.value = productToEdit.stock;
+
+            editProductModal.show(); // Show the modal
+        };
+
+        // Handles the submission of the edit product form
+        editProductForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const productId = editProductIdInput.value;
+            const newName = editProductNameInput.value.trim();
+            const newCostUSD = parseFloat(editProductPriceInput.value);
+            const newStock = parseInt(editProductStockInput.value);
+
+            // Validation
+            if (!newName || isNaN(newCostUSD) || isNaN(newStock) || newCostUSD < 0 || newStock < 0) {
+                alert("Por favor, ingresa datos válidos para editar el producto (Nombre no vacío, Costo y Stock >= 0).");
+                return;
+            }
+
+            // Check for duplicate name (excluding the current product being edited)
+            if (AppState.products.some(p => p.id !== productId && p.name.toLowerCase() === newName.toLowerCase())) {
+                alert(`Ya existe otro producto con el nombre "${newName}".`);
+                return;
+            }
+
+
+            // Find the product index
+            const productIndex = AppState.products.findIndex(p => p.id === productId);
+            if (productIndex !== -1) {
+                // Update product data
+                AppState.products[productIndex].name = newName;
+                AppState.products[productIndex].costUSD = newCostUSD;
+                AppState.products[productIndex].stock = newStock;
+
+                AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Re-sort after name change
+
+                saveData();
+                renderProducts(productSearchInput.value); // Re-render product lists
+                updateBillDisplay(); // Update bill if the edited product is in it
+                renderSales(startDateInput.value, endDateInput.value); // Re-render sales in case price affects history display (unlikely but safe)
+                alert("Producto actualizado con éxito!");
+                editProductModal.hide(); // Hide the modal
+            } else {
+                console.error("Error al encontrar el producto para actualizar:", productId);
+                alert("Error al actualizar el producto.");
+            }
+        });
+
+        // --- Bill Actions ---
+
+        // Adds a product to the current bill (exposed globally for onclick)
+        window.addToBill = function (id) {
+          const product = AppState.products.find((p) => p.id === id);
+
+          if (!product) {
+            console.error("Producto no encontrado para agregar a la factura:", id);
+            return;
+          }
+
+          if (product.stock <= 0) {
+            alert(`¡No hay más ${product.name} en stock!`);
+            return;
+          }
+
+          const existingItem = AppState.currentBill.find((item) => item.id === id);
+
+          if (existingItem) {
+            existingItem.quantity++; // Increment quantity if already in bill
+          } else {
+            // Add new item to the bill
+            AppState.currentBill.push({
+              id: product.id,
+              name: product.name,
+              // costUSD: product.costUSD, // Store cost if needed for historical reports, but calculate price dynamically
+              quantity: 1,
+            });
+             AppState.currentBill.sort((a, b) => a.name.localeCompare(b.name)); // Keep bill sorted
+          }
+
+          product.stock--; // Decrease stock in the main product list
+          updateBillDisplay();
+          renderProducts(productSearchInput.value); // Update stock display in product lists
+          saveData();
+        };
+
+        // Removes an item completely from the current bill (exposed globally for onclick)
+        window.removeFromBill = function(id) {
+            const itemIndex = AppState.currentBill.findIndex(item => item.id === id);
+            if (itemIndex !== -1) {
+                const removedItem = AppState.currentBill.splice(itemIndex, 1)[0]; // Remove and get the item
+                const product = AppState.products.find(p => p.id === removedItem.id);
+                if (product) {
+                    product.stock += removedItem.quantity; // Return the full quantity to stock
+                }
+                updateBillDisplay();
+                renderProducts(productSearchInput.value); // Update stock display
+                saveData();
+            }
+        };
+
+        // Adjusts the quantity of an item in the bill (exposed globally for onclick)
+        window.adjustBillQuantity = function(id, delta) { // delta is +1 or -1
+            const item = AppState.currentBill.find(item => item.id === id);
+            const product = AppState.products.find(p => p.id === id);
+
+            if (!item || !product) {
+                console.error("Item o producto no encontrado para ajustar cantidad:", id);
+                return;
+            }
+
+            const newQuantity = item.quantity + delta;
+
+            if (delta > 0) { // Increasing quantity
+                if (product.stock < delta) { // Use delta here, not 1, in case delta changes later
+                    alert(`No hay suficiente stock de "${product.name}" para añadir más.`);
+                    return;
+                }
+                item.quantity = newQuantity;
+                product.stock -= delta;
+            } else if (delta < 0) { // Decreasing quantity
+                if (newQuantity <= 0) {
+                    // If quantity reaches zero or less, remove the item completely
+                    removeFromBill(id); // This handles returning stock
+                    return; // Exit early as removeFromBill updates display and saves
+                } else {
+                    item.quantity = newQuantity;
+                    product.stock -= delta; // delta is negative, so this adds stock back
+                }
+            }
+
+            updateBillDisplay();
+            renderProducts(productSearchInput.value); // Update stock display
+            saveData();
+        };
+
+        // --- Payment Modal Logic ---
+
+        // Opens the payment modal when "Procesar Factura" is clicked
+        processBillButton.addEventListener("click", () => {
+             if (AppState.currentBill.length === 0) {
+                 alert("La factura está vacía. Agrega productos antes de procesar.");
+                 return;
+             }
+
+             // Update modal total display using current bill totals
+             paymentModalTotalUsdSpan.textContent = `$${currentBillTotalUSD.toFixed(2)}`;
+             paymentModalTotalBsSpan.textContent = ` | ${currentBillTotalBS.toFixed(0)}Bs`;
+
+             // Reset modal state
+             paymentMethodSelect.value = 'usd'; // Default to USD
+             amountReceivedUsdInput.value = '';
+             amountReceivedVesInput.value = '';
+             amountReceivedMixedUsdInput.value = '';
+             amountReceivedMixedVesInput.value = '';
+             paymentStatusP.textContent = '';
+             paymentChangeP.textContent = '';
+             usdChangeOptionsDiv.classList.add('hidden'); // Hide change options
+             usdChangeUsdRadio.checked = true; // Default change currency to USD
+             resetPaymentErrors(); // Clear validation errors
+             confirmPaymentButton.disabled = true; // Disable confirm button initially
+
+             togglePaymentSections('usd'); // Show the default USD section
+
+             paymentModal.show(); // Show the modal
+        });
+
+        // Toggles visibility of payment input sections based on selected method
+        function togglePaymentSections(method) {
+            // Hide all sections first
+            usdPaymentSection.classList.add('hidden');
+            vesPaymentSection.classList.add('hidden');
+            mixedPaymentSection.classList.add('hidden');
+            usdChangeOptionsDiv.classList.add('hidden'); // Always hide change options when switching
+
+            // Clear inputs and results when switching
+            amountReceivedUsdInput.value = '';
+            amountReceivedVesInput.value = '';
+            amountReceivedMixedUsdInput.value = '';
+            amountReceivedMixedVesInput.value = '';
+            paymentStatusP.textContent = '';
+            paymentChangeP.textContent = '';
+            resetPaymentErrors();
+            confirmPaymentButton.disabled = true; // Disable confirm button
+
+            // Show the selected section
+            if (method === 'usd') {
+                usdPaymentSection.classList.remove('hidden');
+            } else if (method === 'ves') {
+                vesPaymentSection.classList.remove('hidden');
+            } else if (method === 'mixed') {
+                mixedPaymentSection.classList.remove('hidden');
+            }
+        }
+
+        // Updates the visible payment section when the dropdown changes
+        paymentMethodSelect.addEventListener('change', (e) => {
+            togglePaymentSections(e.target.value);
+        });
+
+        // --- Input Validation and Calculation ---
+
+        // Validates that input is a non-negative integer (allows empty string)
+        function validateIntegerInput(inputElement, errorElement, message) {
+            const value = inputElement.value;
+            // Regex: Allows empty string OR one or more digits. No decimals, no negative sign.
+            const isValid = value === '' || /^\d+$/.test(value);
+
+            if (!isValid) {
+                errorElement.textContent = message;
+                inputElement.classList.add('is-invalid');
+                return false;
+            } else {
+                errorElement.textContent = '';
+                inputElement.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Clears all validation error messages and styles
+        function resetPaymentErrors() {
+            amountReceivedUsdError.textContent = '';
+            amountReceivedVesError.textContent = '';
+            amountReceivedMixedUsdError.textContent = '';
+            amountReceivedMixedVesError.textContent = '';
+            amountReceivedUsdInput.classList.remove('is-invalid');
+            amountReceivedVesInput.classList.remove('is-invalid');
+            amountReceivedMixedUsdInput.classList.remove('is-invalid');
+            amountReceivedMixedVesInput.classList.remove('is-invalid');
+        }
+
+        // Add input event listeners to trigger validation and recalculation
+        amountReceivedUsdInput.addEventListener('input', () => {
+            validateIntegerInput(amountReceivedUsdInput, amountReceivedUsdError, "Solo números enteros positivos.");
+            calculatePayment();
+        });
+        amountReceivedVesInput.addEventListener('input', () => {
+             // Remove decimals immediately for VES
+             amountReceivedVesInput.value = amountReceivedVesInput.value.replace(/\./g, '');
+            validateIntegerInput(amountReceivedVesInput, amountReceivedVesError, "Solo números enteros positivos.");
+            calculatePayment();
+        });
+        amountReceivedMixedUsdInput.addEventListener('input', () => {
+            validateIntegerInput(amountReceivedMixedUsdInput, amountReceivedMixedUsdError, "Solo números enteros positivos.");
+            calculatePayment();
+        });
+        amountReceivedMixedVesInput.addEventListener('input', () => {
+             // Remove decimals immediately for VES
+             amountReceivedMixedVesInput.value = amountReceivedMixedVesInput.value.replace(/\./g, '');
+            validateIntegerInput(amountReceivedMixedVesInput, amountReceivedMixedVesError, "Solo números enteros positivos.");
+            calculatePayment();
+        });
+
+        // Recalculate payment if change currency option changes
+        usdChangeUsdRadio.addEventListener('change', calculatePayment);
+        usdChangeVesRadio.addEventListener('change', calculatePayment);
+
+        // Calculates payment status (faltante/vuelto) based on inputs
+        function calculatePayment() {
+            const method = paymentMethodSelect.value;
+            const exchangeRate = AppState.exchangeRate;
+            let receivedUSD_val = 0;
+            let receivedVES_val = 0;
+            let isValid = true; // Assume valid initially
+            let isPaymentSufficient = false; // Track if payment covers the total
+
+            // Clear previous results and hide change options
+            paymentStatusP.textContent = '';
+            paymentChangeP.textContent = '';
+            usdChangeOptionsDiv.classList.add('hidden');
+
+            // --- Get received amounts, validate, and calculate status ---
+            if (method === 'usd') {
+                isValid = validateIntegerInput(amountReceivedUsdInput, amountReceivedUsdError, "Solo números enteros positivos.");
+                receivedUSD_val = parseInt(amountReceivedUsdInput.value) || 0;
+
+                if (isValid && receivedUSD_val >= 0) {
+                    const differenceUSD = receivedUSD_val - currentBillTotalUSD;
+                    if (differenceUSD < -0.001) { // Faltante
+                        paymentStatusP.textContent = `Falta: ${Math.abs(differenceUSD).toFixed(2)}$`;
+                    } else {
+                        isPaymentSufficient = true; // Payment is sufficient
+                        if (differenceUSD > 0.001) { // Vuelto
+                           paymentStatusP.textContent = 'Pago completo.';
+                           usdChangeOptionsDiv.classList.remove('hidden'); // Show change options
+                           const changeCurrency = document.querySelector('input[name="usd-change-currency"]:checked').value;
+                           if (changeCurrency === 'usd') {
+                               paymentChangeP.textContent = `Vuelto: ${differenceUSD.toFixed(2)}$`;
+                           } else {
+                               const vueltoVES = Math.round(differenceUSD * exchangeRate);
+                               paymentChangeP.textContent = `Vuelto: ${vueltoVES.toFixed(0)}Bs`;
+                           }
+                        } else { // Pago exacto
+                            paymentStatusP.textContent = 'Pago exacto.';
+                        }
+                    }
+                }
+
+            } else if (method === 'ves') {
+                // *** MODIFIED VES LOGIC ***
+                isValid = validateIntegerInput(amountReceivedVesInput, amountReceivedVesError, "Solo números enteros positivos.");
+                receivedVES_val = parseInt(amountReceivedVesInput.value) || 0;
+
+                if (isValid && receivedVES_val >= 0) {
+                    const differenceVES = receivedVES_val - currentBillTotalBS; // Direct comparison in VES
+
+                    if (differenceVES < 0) { // Faltante
+                        paymentStatusP.textContent = `Falta: ${Math.abs(differenceVES).toFixed(0)}Bs`;
+                    } else {
+                        isPaymentSufficient = true; // Payment is sufficient
+                        if (differenceVES > 0) { // Vuelto
+                           paymentStatusP.textContent = 'Pago completo.';
+                           paymentChangeP.textContent = `Vuelto: ${differenceVES.toFixed(0)}Bs`; // Change is always in VES
+                        } else { // Pago exacto
+                            paymentStatusP.textContent = 'Pago exacto.';
+                        }
+                    }
+                }
+                // *** END OF MODIFIED VES LOGIC ***
+
+            } else if (method === 'mixed') {
+                const usdValid = validateIntegerInput(amountReceivedMixedUsdInput, amountReceivedMixedUsdError, "Solo números enteros positivos.");
+                const vesValid = validateIntegerInput(amountReceivedMixedVesInput, amountReceivedMixedVesError, "Solo números enteros positivos.");
+                isValid = usdValid && vesValid; // Both must be valid
+
+                receivedUSD_val = parseInt(amountReceivedMixedUsdInput.value) || 0;
+                receivedVES_val = parseInt(amountReceivedMixedVesInput.value) || 0;
+
+                if (isValid && (receivedUSD_val >= 0 || receivedVES_val >= 0)) { // Check non-negative amounts
+                    const totalReceivedEquivalentUSD = receivedUSD_val + (receivedVES_val / exchangeRate);
+                    const differenceUSD = totalReceivedEquivalentUSD - currentBillTotalUSD;
+
+                    if (differenceUSD < -0.0099) { // Faltante
+                        const faltanteUSD =  Math.abs(differenceUSD);
+                        const faltanteVES = parseInt(Math.round(faltanteUSD * exchangeRate));
+                        paymentStatusP.textContent = `Falta: ${faltanteUSD.toFixed(2)}$ (${faltanteVES.toFixed(0)}Bs)`;
+                    } else {
+                        isPaymentSufficient = true; // Payment is sufficient
+                        if (differenceUSD > 0.001) { // Vuelto
+                            paymentStatusP.textContent = 'Pago completo.';
+                            // Default change in VES for mixed payments
+                            const vueltoVES = Math.round(differenceUSD * exchangeRate);
+                            paymentChangeP.textContent = `Vuelto: ${vueltoVES.toFixed(0)}Bs`;
+                        } else { // Pago exacto
+                            paymentStatusP.textContent = 'Pago exacto.';
+                        }
+                    }
+                }
+            }
+
+            // --- Enable/Disable Confirm Button ---
+            // Enable only if input is valid AND payment is sufficient AND at least one amount is received
+            const anyAmountReceived = receivedUSD_val > 0 || receivedVES_val > 0;
+            confirmPaymentButton.disabled = !isValid || !isPaymentSufficient || !anyAmountReceived;
+
+        }
+
+
+        // Handles the confirmation of the payment
+        confirmPaymentButton.addEventListener('click', () => {
+            const method = paymentMethodSelect.value;
+            let receivedUSD_customer = 0;
+            let receivedBS_customer = 0;
+            let changeGivenUSD = 0;
+            let changeGivenBS = 0;
+
+            // --- Determine final received amounts and calculate change based on method ---
+             if (method === 'usd') {
+                receivedUSD_customer = parseInt(amountReceivedUsdInput.value) || 0;
+                const difference_usd = receivedUSD_customer - currentBillTotalUSD;
+                if (difference_usd > 0.001) { // If change is due
+                    const changeCurrency = document.querySelector('input[name="usd-change-currency"]:checked').value;
+                    if (changeCurrency === 'usd') {
+                        changeGivenUSD = parseFloat(difference_usd.toFixed(2)); // Keep decimals for USD change
+                    } else {
+                        changeGivenBS = Math.round(difference_usd * AppState.exchangeRate);
+                    }
+                }
+            } else if (method === 'ves') {
+                // *** MODIFIED VES CHANGE CALCULATION ***
+                receivedBS_customer = parseInt(amountReceivedVesInput.value) || 0;
+                const difference_ves = receivedBS_customer - currentBillTotalBS; // Direct difference in VES
+                 if (difference_ves > 0) { // If change is due
+                    changeGivenBS = difference_ves; // Change is directly the positive difference in VES
+                 }
+                 // *** END OF MODIFIED VES CHANGE CALCULATION ***
+            } else if (method === 'mixed') {
+                receivedUSD_customer = parseInt(amountReceivedMixedUsdInput.value) || 0;
+                receivedBS_customer = parseInt(amountReceivedMixedVesInput.value) || 0;
+                const totalReceivedEquivalentUSD = receivedUSD_customer + (receivedBS_customer / AppState.exchangeRate);
+                const difference_usd = totalReceivedEquivalentUSD - currentBillTotalUSD;
+                 if (difference_usd > 0.001) { // If change is due
+                     // Default to giving change in VES for mixed payments
+                    changeGivenBS = Math.round(difference_usd * AppState.exchangeRate);
+                 }
+            }
+
+
+             // --- Create and store the sale record ---
+             const sale = {
+                 date: new Date().toISOString(), // Store date as ISO string for consistency
+                 items: AppState.currentBill.map(item => {
+                     const product = AppState.products.find(p => p.id === item.id);
+                     const pricesAtSale = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0 };
+                     return {
+                         id: item.id,
+                         name: item.name,
+                         quantity: item.quantity,
+                         pricesAtSale: pricesAtSale, // Store calculated prices at the time of sale
+                     };
+                 }),
+                 totalUSD: currentBillTotalUSD,
+                 totalBS: currentBillTotalBS,
+                 paymentMethod: method,
+                 receivedUSD_customer: receivedUSD_customer, // Amount customer physically gave in USD
+                 receivedBS_customer: receivedBS_customer,   // Amount customer physically gave in VES
+                 changeGivenUSD: changeGivenUSD,             // Change given back in USD (ensure integer for display if needed)
+                 changeGivenBS: Math.round(changeGivenBS),   // Change given back in VES (ensure integer)
+                 exchangeRate: AppState.exchangeRate         // Exchange rate at the time of sale
+             };
+
+             AppState.sales.push(sale);
+             AppState.currentBill = []; // Clear the current bill
+             saveData();
+
+             // --- Update UI ---
+             updateBillDisplay(); // Update bill display (will show empty)
+             renderSales(startDateInput.value, endDateInput.value); // Update sales history
+             renderProducts(productSearchInput.value); // Update product stock display (already updated during bill modification)
+
+             paymentModal.hide(); // Hide the payment modal
+             alert("Factura procesada con éxito!");
+        });
+
+
+        // Enables/Disables the "Procesar Factura" button based on whether the bill has items
+        function checkBillAndToggleFacturarButton() {
+             processBillButton.disabled = AppState.currentBill.length === 0;
+        }
+
+        // --- Sale Detail Logic ---
+
+        // Displays details of a specific sale in a modal (exposed globally for onclick)
+        window.viewSaleDetail = function(saleDateISOString) {
+            const sale = AppState.sales.find(s => s.date === saleDateISOString);
+            if (!sale) {
+                console.error("Venta no encontrada:", saleDateISOString);
+                return;
+            }
+
+            // Populate modal fields
+            saleDetailDateSpan.textContent = new Date(sale.date).toLocaleString('es-VE'); // Format date/time
+            saleDetailMethodSpan.textContent = sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A';
+
+            // Display amounts exactly as stored (what customer gave, what change was given)
+            saleDetailReceivedCustomerSpan.textContent = `${(sale.receivedUSD_customer || 0).toFixed(0)}$ + ${(sale.receivedBS_customer || 0).toFixed(0)}Bs`;
+            // Ensure changeGivenBS is displayed as integer
+            saleDetailChangeGivenSpan.textContent = `${(sale.changeGivenUSD || 0).toFixed(2)}$ | ${Math.round(sale.changeGivenBS || 0).toFixed(0)}Bs`;
+
+            // Calculate and display net received
+            const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
+            const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
+            // Ensure net received BS is displayed as integer
+            saleDetailReceivedNetSpan.textContent = `${actualReceivedUSD.toFixed(2)}$ | ${Math.round(actualReceivedBS).toFixed(0)}Bs`;
+
+            saleDetailTotalSpan.textContent = `${sale.totalUSD.toFixed(2)}$ | ${sale.totalBS.toFixed(0)}Bs`;
+            saleDetailExchangeRateSpan.textContent = sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A';
+
+            // Populate item list using prices stored at the time of sale
+            saleDetailItemsList.innerHTML = sale.items.map(item => {
+                const itemTotalUSD = (item.pricesAtSale?.priceUSD || 0) * item.quantity;
+                const itemTotalBS = (item.pricesAtSale?.priceBS || 0) * item.quantity;
+                return `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span class="badge bg-light text-dark rounded-pill">${item.pricesAtSale?.priceUSD?.toFixed(2)}$ | ${item.pricesAtSale?.priceBS?.toFixed(0)}Bs</span>
+                    </li>
+                `;
+            }).join('');
+
+            saleDetailModal.show(); // Show the modal
+        };
+
+        // --- General Event Listeners ---
+
+        // Updates exchange rate and recalculates prices when input changes
+        exchangeRateInput.addEventListener("input", (e) => {
+          const newRate = parseFloat(e.target.value);
+          if (!isNaN(newRate) && newRate > 0) {
+            AppState.exchangeRate = newRate;
+            saveData();
+            // Re-render affected parts of the UI
+            renderProducts(productSearchInput.value);
+            updateBillDisplay();
+            renderSales(startDateInput.value, endDateInput.value); // Re-render sales as BS totals might change display slightly
+          } else {
+              // Provide feedback without alert if possible, maybe input validation styling
+              // console.warn("Tasa de cambio inválida ingresada.");
+              // Optionally reset to the last valid rate if input becomes invalid
+              // e.target.value = AppState.exchangeRate.toFixed(2);
+          }
+        });
+         // Prevent non-numeric input in exchange rate
+         exchangeRateInput.addEventListener("keypress", (e) => {
+            if (!/[0-9.]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+                e.preventDefault();
+            }
+        });
+
+
+        // Filters the product list on the Home tab as the user types
+        productSearchInput.addEventListener('input', (e) => {
+            renderProducts(e.target.value);
+        });
+
+        // Applies date filters to the sales history
+        filterSalesButton.addEventListener('click', () => {
+            renderSales(startDateInput.value, endDateInput.value);
+        });
+
+        // Clears date filters and shows all sales
+        clearSalesFilterButton.addEventListener('click', () => {
+            startDateInput.value = '';
+            endDateInput.value = '';
+            renderSales(); // Render all sales
+        });
+
+        // Clears all data from localStorage after confirmation
+        if (clearStorageButton) {
+            clearStorageButton.addEventListener('click', () => {
+                if (confirm('ADVERTENCIA: ¿Estás ABSOLUTAMENTE seguro de que deseas eliminar TODOS los datos (productos, ventas, factura actual)? Esta acción es irreversible.')) {
+                    if (confirm('CONFIRMACIÓN FINAL: Eliminar todos los datos permanentemente.')) {
+                        localStorage.clear();
+                        // Reset AppState in memory to default
+                        AppState = {
+                            products: [],
+                            sales: [],
+                            currentBill: [],
+                            exchangeRate: 85.40, // Reset to default rate
+                        };
+                        // Re-render the entire UI to reflect the empty state
+                        renderProducts();
+                        renderSales();
+                        updateBillDisplay();
+                        exchangeRateInput.value = AppState.exchangeRate.toFixed(2);
+                        productSearchInput.value = ''; // Clear search
+                        startDateInput.value = ''; // Clear date filters
+                        endDateInput.value = '';
+                        alert('Todos los datos han sido eliminados permanentemente.');
+                    }
+                }
+            });
+        }
+
+
+        // --- Initial Application Load ---
+        loadData(); // Load data from localStorage
+        renderProducts(); // Render initial product lists
+        renderSales(); // Render initial sales history
+        updateBillDisplay(); // Render initial bill state
+        checkBillAndToggleFacturarButton(); // Set initial state of the process button
+
+      }); // End DOMContentLoaded
+    </script>
+  </body>
+</html>
