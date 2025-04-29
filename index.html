@@ -14,10 +14,23 @@
     />
     <style>
       :root {
-        --primary-color: #2563eb;
-        --secondary-color: #3b82f6;
-        --background-color: #f8fafc;
-        --text-color: #1e293b;
+        --primary-color: #2563eb; /* Blue 600 */
+        --secondary-color: #3b82f6; /* Blue 500 */
+        --background-color: #f8fafc; /* Slate 50 */
+        --text-color: #1e293b; /* Slate 800 */
+        --success-color: #10b981; /* Emerald 500 */
+        --info-color: #60a5fa; /* Blue 400 */
+        --warning-color: #f59e0b; /* Amber 500 */
+        --danger-color: #ef4444; /* Red 500 */
+        --border-color: #e2e8f0; /* Slate 200 */
+        --card-bg: #ffffff; /* White */
+
+        /* Consistent Button Styles */
+         --btn-padding-y: 0.375rem;
+         --btn-padding-x: 0.75rem;
+         --btn-font-size: 1rem;
+         --btn-border-radius: 0.25rem; /* Bootstrap default */
+         --btn-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
       }
 
       body {
@@ -37,6 +50,7 @@
         border: none;
         border-radius: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: var(--card-bg); /* Ensure cards have white background */
       }
 
       .total-display {
@@ -86,14 +100,21 @@
           background-color: #fef3c7; /* Light yellow background */
       }
 
-      /* Style for clickable table rows */
-      .clickable-row {
-          cursor: pointer;
-      }
+       /* Style for clickable table rows and sale item cards */
+       .clickable-row,
+       .sale-item-card {
+           cursor: pointer;
+           transition: background-color 0.15s ease-in-out; /* Smooth hover effect */
+       }
 
-      .clickable-row:hover {
-          background-color: #e9ecef; /* Light grey on hover */
-      }
+       .clickable-row:hover {
+           background-color: #e9ecef; /* Light grey on hover */
+       }
+
+       .sale-item-card:hover {
+            background-color: #f1f5f9; /* Slightly darker slate 100 on hover */
+       }
+
 
        /* Style for sale detail modal item list */
        #sale-detail-items .list-group-item {
@@ -103,7 +124,7 @@
 
        /* Style for error messages in modal */
        .payment-error {
-           color: #dc3545; /* Bootstrap danger color */
+           color: var(--danger-color); /* Bootstrap danger color */
            font-size: 0.875em;
            margin-top: 0.25rem;
        }
@@ -117,6 +138,284 @@
            min-width: 250px; /* Minimum width */
            max-width: 90%; /* Maximum width */
        }
+
+       /* Style for grouping info in sale detail modal */
+       .sale-detail-group {
+           margin-bottom: 1rem;
+           padding: 0.75rem;
+           border: 1px solid var(--border-color); /* Light grey border */
+           border-radius: 8px;
+           background-color: var(--background-color); /* Light background */
+       }
+
+       .sale-detail-group h6 {
+           margin-top: 0;
+           margin-bottom: 0.5rem;
+           color: var(--primary-color);
+       }
+
+        /* Style for the chart container */
+       #sales-chart-container {
+           position: relative; /* Needed for canvas sizing */
+           height: 300px; /* Set a height for the chart */
+           width: 100%; /* Make it responsive */
+           /* Removed margin-top as it's now in a floating panel */
+       }
+
+       /* New Sales Tab Layout Styles */
+
+       .sales-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 20px;
+           padding-bottom: 15px;
+           border-bottom: 1px solid var(--border-color);
+       }
+
+       .sales-header h5 {
+           margin-bottom: 0;
+           color: var(--text-color);
+       }
+
+       .sales-controls-row {
+           display: flex;
+           align-items: center;
+           gap: 15px; /* Space between controls */
+           flex-wrap: wrap; /* Allow wrapping on smaller screens */
+       }
+
+        .sales-controls-row .form-select-sm,
+        .sales-controls-row .btn-sm {
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .sales-controls-row label {
+            margin-bottom: 0; /* Remove bottom margin from label */
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .sales-summary-inline {
+            display: flex;
+            justify-content: space-around; /* Distribute space evenly */
+            align-items: center;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 10px; /* Space between summary items on wrap */
+        }
+
+         .summary-item {
+             text-align: center;
+         }
+
+         .summary-item span {
+             font-size: 0.9rem;
+             color: #64748b; /* Slate 500 */
+         }
+          .summary-item strong {
+              display: block;
+              font-size: 1.3rem; /* Slightly larger font for the total */
+              margin-top: 5px;
+              color: var(--primary-color); /* Use primary color for emphasis */
+          }
+
+
+          /* Floating Chart Panel Styles */
+          #chart-floating-panel {
+              position: fixed;
+              top: 70px; /* Adjust based on navbar height */
+              right: 20px;
+              width: 350px; /* Fixed width for the panel */
+              background-color: var(--card-bg);
+              border: 1px solid var(--border-color);
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+              padding: 15px;
+              z-index: 1000; /* Ensure it's above main content */
+              transform: translateX(400px); /* Start off-screen */
+              transition: transform 0.3s ease-in-out;
+          }
+
+          #chart-floating-panel.show {
+              transform: translateX(0); /* Slide in */
+          }
+
+           #chart-floating-panel .panel-header {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               margin-bottom: 15px;
+               padding-bottom: 10px;
+               border-bottom: 1px solid var(--border-color);
+           }
+
+           #chart-floating-panel .panel-header h6 {
+               margin-bottom: 0;
+               color: var(--primary-color);
+           }
+
+           #chart-floating-panel .panel-header .btn-close {
+               padding: 0.5rem; /* Make close button easier to click */
+           }
+
+
+          /* Sales History List Styles (Replacing Table) */
+          #sales-history-list {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              display: flex; /* Use flexbox for horizontal layout */
+              flex-wrap: wrap; /* Allow items to wrap to the next line */
+              gap: 15px; /* Space between cards */
+          }
+
+          .sale-item-card {
+              background-color: var(--card-bg);
+              border: 1px solid var(--border-color);
+              border-radius: 8px;
+              padding: 15px;
+              /* Removed margin-bottom as gap handles spacing */
+              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+              flex: 1 1 300px; /* Flex properties: grow, shrink, basis */
+              max-width: calc(50% - 7.5px); /* Max width for two items per row (adjust gap) */
+              min-width: 300px; /* Minimum width before wrapping */
+              box-sizing: border-box; /* Include padding and border in element's total width */
+          }
+
+          /* Adjust max-width for smaller screens */
+           @media (max-width: 768px) {
+               .sale-item-card {
+                   max-width: 100%; /* Full width on small screens */
+                   flex: 1 1 100%;
+               }
+           }
+
+
+          .sale-item-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 10px;
+              padding-bottom: 8px;
+              border-bottom: 1px dashed #ccc;
+          }
+
+          .sale-item-header .sale-date {
+              font-weight: bold;
+              color: var(--text-color);
+          }
+
+           .sale-item-details {
+               margin-bottom: 10px;
+               font-size: 0.9rem;
+               color: #475569; /* Slate 600 */
+           }
+
+            .sale-item-details strong {
+                color: var(--text-color);
+            }
+
+            .sale-item-products {
+                font-style: italic;
+                margin-bottom: 10px;
+            }
+
+           /* Removed sale-item-actions as buttons are now in modal */
+
+
+           /* General Button Consistency */
+            .btn {
+                border-radius: var(--btn-border-radius);
+                transition: var(--btn-transition);
+            }
+
+            .btn-primary {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+                color: white;
+            }
+             .btn-primary:hover {
+                 background-color: var(--secondary-color);
+                 border-color: var(--secondary-color);
+             }
+
+            .btn-success {
+                background-color: var(--success-color);
+                border-color: var(--success-color);
+                color: white;
+            }
+             .btn-success:hover {
+                 background-color: #059669; /* Darker emerald */
+                 border-color: #059669;
+             }
+
+            .btn-info {
+                background-color: var(--info-color);
+                border-color: var(--info-color);
+                color: white;
+            }
+             .btn-info:hover {
+                 background-color: #3b82f6; /* Darker info */
+                 border-color: #3b82f6;
+             }
+
+            .btn-warning {
+                background-color: var(--warning-color);
+                border-color: var(--warning-color);
+                color: white; /* Keep text white for better contrast */
+            }
+             .btn-warning:hover {
+                 background-color: #d97706; /* Darker amber */
+                 border-color: #d97706;
+             }
+
+
+            .btn-danger {
+                background-color: var(--danger-color);
+                border-color: var(--danger-color);
+                color: white;
+            }
+             .btn-danger:hover {
+                 background-color: #b91c1c; /* Darker red */
+                 border-color: #b11c1c; /* Corrected darker red border */
+             }
+
+            .btn-secondary {
+                /* Using Bootstrap default secondary, or define if needed */
+            }
+
+            /* Adjust small button padding for consistency */
+            .btn-sm {
+                padding: calc(var(--btn-padding-y) * 0.5) calc(var(--btn-padding-x) * 0.5);
+                font-size: calc(var(--btn-font-size) * 0.875);
+                border-radius: var(--btn-border-radius);
+            }
+
+             /* Form Control Consistency */
+             .form-control,
+             .form-select {
+                 border-radius: var(--btn-border-radius);
+                 border-color: var(--border-color);
+                 box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+             }
+              .form-control:focus,
+              .form-select:focus {
+                  border-color: var(--primary-color);
+                  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25); /* Primary color focus ring */
+              }
+
+              /* Add padding to the bottom of the sales section */
+              #sales {
+                  padding-bottom: 30px; /* Adjust value as needed */
+              }
+
+
     </style>
   </head>
   <body>
@@ -216,8 +515,7 @@
                         <th>Precio $</th>
                         <th>Precio Bs</th>
                         <th>Existencia</th>
-                        <th>Acciones</th>
-                      </tr>
+                        <th>Acciones</th> </tr>
                     </thead>
                     <tbody id="products-list">
                       </tbody>
@@ -335,8 +633,7 @@
                         <th>Precio Venta $</th>
                         <th>Precio Venta Bs</th>
                         <th>Existencia</th>
-                        <th>Acciones</th>
-                      </tr>
+                        </tr>
                     </thead>
                     <tbody id="products-management-list">
                       </tbody>
@@ -353,75 +650,66 @@
           role="tabpanel"
           aria-labelledby="sales-tab"
         >
-          <div class="card">
-            <div class="card-header bg-white">
-              <div class="d-flex justify-content-between align-items-center">
-                  <h5><i class="bi bi-graph-up me-2"></i>Historial de Ventas</h5>
-                  <div class="d-flex align-items-center">
-                      <label for="start-date" class="form-label me-2 mb-0">Desde:</label>
-                      <input type="date" id="start-date" class="form-control form-control-sm me-2">
-                      <label for="end-date" class="form-label me-2 mb-0">Hasta:</label>
-                      <input type="date" id="end-date" class="form-control form-control-sm me-2">
-                      <button id="filter-sales-button" class="btn btn-primary btn-sm me-2">
-                          <i class="bi bi-filter"></i> Filtrar
-                      </button>
-                       <button id="clear-sales-filter-button" class="btn btn-secondary btn-sm me-2">
-                          <i class="bi bi-x-circle"></i> Limpiar
-                      </button>
-                       <button id="export-sales-button" class="btn btn-secondary btn-sm">
-                          <i class="bi bi-file-earmark-excel me-2"></i>Exportar Ventas (CSV)
-                       </button>
-                  </div>
-              </div>
-            </div>
-            <div class="card-body">
-                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="alert alert-info py-2 mb-0">
-                            Total Ventas ($): <strong id="total-sales-usd">0.00$</strong>
-                        </div>
-                    </div>
-                     <div class="col-md-6">
-                        <div class="alert alert-info py-2 mb-0">
-                            Total Ventas (Bs): <strong id="total-sales-bs">0.00Bs</strong>
-                        </div>
-                    </div>
-                </div>
-                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="alert alert-success py-2 mb-0">
-                            Total Recibido Neto ($): <strong id="total-received-usd">0.00$</strong>
-                        </div>
-                    </div>
-                     <div class="col-md-6">
-                        <div class="alert alert-success py-2 mb-0">
-                            Total Recibido Neto (Bs): <strong id="total-received-bs">0.00Bs</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive" style="max-height: 400px"> <table class="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>Fecha</th>
-                        <th>Productos</th>
-                        <th>Cantidad Total</th>
-                        <th>Total Venta $</th>
-                        <th>Total Venta Bs</th>
-                        <th>Método de Pago</th>
-                        <th>Tasa Cambio</th>
-                        <th>Recibido Neto $</th>
-                        <th>Recibido Neto Bs</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sales-history">
-                      </tbody>
-                  </table>
-                </div>
-            </div>
-          </div>
+           <div class="sales-header">
+               <h5><i class="bi bi-graph-up me-2"></i>Panel de Ventas</h5>
+               <div class="sales-controls-row">
+                   <label for="sales-filter">Mostrar:</label>
+                   <select id="sales-filter" class="form-select form-select-sm">
+                       <option value="all">Todas las Ventas</option>
+                       <option value="today">Ventas de Hoy</option>
+                       <option value="yesterday">Ventas de Ayer</option>
+                       <option value="this-week">Ventas de Esta Semana</option>
+                       <option value="this-month">Ventas de Este Mes</option>
+                       <option value="this-year">Ventas de Este Año</option>
+                   </select>
+                   <button id="export-sales-button" class="btn btn-secondary btn-sm me-2">
+                       <i class="bi bi-file-earmark-excel me-2"></i>Exportar Ventas (CSV)
+                   </button>
+                    <button id="toggle-chart-panel-button" class="btn btn-info btn-sm">
+                       <i class="bi bi-bar-chart me-2"></i>Mostrar Gráfico
+                   </button>
+               </div>
+           </div>
+
+           <div class="sales-summary-inline">
+               <div class="summary-item">
+                   <span>Total Venta Filtrado ($):</span>
+                   <strong id="total-sales-usd">0.00$</strong>
+               </div>
+               <div class="summary-item">
+                   <span>Total Venta Filtrado (Bs):</span>
+                   <strong id="total-sales-bs">0.00Bs</strong>
+               </div>
+               <div class="summary-item">
+                   <span>Total Recibido Neto Filtrado ($):</span>
+                   <strong id="total-received-usd">0.00$</strong>
+               </div>
+               <div class="summary-item">
+                   <span>Total Recibido Neto Filtrado (Bs):</span>
+                   <strong id="total-received-bs">0.00Bs</strong>
+               </div>
+           </div>
+
+            <div class="sales-table-section">
+               <h5><i class="bi bi-list-ul me-2"></i>Historial Detallado de Ventas</h5>
+               <div id="sales-history-list">
+                   <p class="text-center text-muted">No hay ventas registradas.</p>
+               </div>
+           </div>
         </div>
       </div>
     </div>
+
+    <div id="chart-floating-panel">
+        <div class="panel-header">
+            <h6>Gráfico de Productos Más Vendidos</h6>
+            <button type="button" class="btn-close" aria-label="Close"></button>
+        </div>
+        <div id="sales-chart-container">
+            <canvas id="top-products-chart"></canvas>
+        </div>
+    </div>
+
 
     <div
       class="modal fade"
@@ -458,9 +746,12 @@
                  <label for="edit-product-stock" class="form-label">Cantidad (Stock)</label>
                 <input type="number" id="edit-product-stock" class="form-control" required min="0">
               </div>
-              <button type="submit" class="btn btn-primary w-100">
+              <button type="submit" class="btn btn-primary w-100 mb-3">
                 <i class="bi bi-save me-2"></i>Guardar Cambios
               </button>
+               <button type="button" class="btn btn-danger w-100" id="delete-product-from-modal">
+                   <i class="bi bi-trash me-2"></i>Eliminar Producto
+               </button>
             </form>
           </div>
         </div>
@@ -488,17 +779,40 @@
             ></button>
           </div>
           <div class="modal-body">
-              <p><strong>Fecha:</strong> <span id="sale-detail-date"></span></p>
-              <p><strong>Método de Pago:</strong> <span id="sale-detail-method"></span></p>
-               <p><strong>Monto Recibido (Cliente):</strong> <span id="sale-detail-received-customer"></span></p>
-               <p><strong>Vuelto Entregado:</strong> <span id="sale-detail-change-given"></span></p>
-               <p><strong>Monto Recibido Neto:</strong> <span id="sale-detail-received-net"></span></p>
-               <p><strong>Total Venta:</strong> <span id="sale-detail-total"></span></p>
-              <p><strong>Tasa de Cambio:</strong> <span id="sale-detail-exchange-rate"></span> Bs/$</p>
-              <h6>Productos:</h6>
+              <div class="sale-detail-group">
+                  <h6>Información de la Venta</h6>
+                  <p><strong>Fecha:</strong> <span id="sale-detail-date"></span></p>
+                  <p><strong>Método de Pago:</strong> <span id="sale-detail-method"></span></p>
+                   <p><strong>Tasa de Cambio:</strong> <span id="sale-detail-exchange-rate"></span> Bs/$</p>
+              </div>
+
+              <div class="sale-detail-group">
+                  <h6>Detalle del Pago</h6>
+                   <p><strong>Monto Recibido Cliente ($):</strong> <span id="sale-detail-received-customer-usd"></span></p>
+                   <p><strong>Monto Recibido Cliente (Bs):</strong> <span id="sale-detail-received-customer-bs"></span></p>
+                   <p><strong>Vuelto Entregado ($):</strong> <span id="sale-detail-change-given-usd"></span></p>
+                   <p><strong>Vuelto Entregado (Bs):</strong> <span id="sale-detail-change-given-bs"></span></p>
+                   <p><strong>Monto Recibido Neto ($):</strong> <span id="sale-detail-received-net-usd"></span></p>
+                   <p><strong>Monto Recibido Neto (Bs):</strong> <span id="sale-detail-received-net-bs"></span></p>
+              </div>
+
+               <div class="sale-detail-group">
+                   <h6>Total de la Venta</h6>
+                   <p><strong>Total Venta ($):</strong> <span id="sale-detail-total-usd"></span></p>
+                    <p><strong>Total Venta (Bs):</strong> <span id="sale-detail-total-bs"></span></p>
+               </div>
+
+
+              <h6>Productos Vendidos:</h6>
               <ul id="sale-detail-items" class="list-group">
                   </ul>
           </div>
+           <div class="modal-footer">
+               <button type="button" class="btn btn-danger me-auto" id="delete-sale-from-modal">
+                   <i class="bi bi-trash me-2"></i>Eliminar Venta
+               </button>
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+           </div>
         </div>
       </div>
     </div>
@@ -589,7 +903,7 @@
       </div>
     </div>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       // Ensure JS runs after DOM is fully loaded
@@ -603,11 +917,11 @@
         };
 
         // --- DOM Element References ---
-        const productsList = document.getElementById("products-list"); // Home tab product list
-        const managementList = document.getElementById("products-management-list"); // Products tab management list
+        const productsListTbody = document.getElementById("products-list"); // Home tab product list tbody
+        const managementListTbody = document.getElementById("products-management-list"); // Products tab management list tbody
         const currentBillItemsDiv = document.getElementById("current-bill-items");
         const totalDisplaySpan = document.getElementById("total-display");
-        const salesHistoryTbody = document.getElementById("sales-history");
+        const salesHistoryListDiv = document.getElementById('sales-history-list'); // Div for sales history list
         const newProductForm = document.getElementById("new-product-form");
         const exchangeRateInput = document.getElementById("exchange-rate");
         const emptyBillMessage = document.getElementById("empty-bill-message");
@@ -615,11 +929,9 @@
         const messageArea = document.getElementById('message-area'); // Reference to the new message area
 
         // Filtering and Searching Elements
-        const startDateInput = document.getElementById('start-date');
-        const endDateInput = document.getElementById('end-date');
-        const filterSalesButton = document.getElementById('filter-sales-button');
-        const clearSalesFilterButton = document.getElementById('clear-sales-filter-button');
         const productSearchInput = document.getElementById('product-search');
+        const salesFilterSelect = document.getElementById('sales-filter');
+
 
         // Edit Product Modal Elements
         const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
@@ -628,17 +940,24 @@
         const editProductNameInput = document.getElementById('edit-product-name');
         const editProductPriceInput = document.getElementById('edit-product-price'); // This is cost
         const editProductStockInput = document.getElementById('edit-product-stock');
+        const deleteProductFromModalButton = document.getElementById('delete-product-from-modal'); // New delete button in modal
 
         // Sale Detail Modal Elements
         const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
         const saleDetailDateSpan = document.getElementById('sale-detail-date');
         const saleDetailMethodSpan = document.getElementById('sale-detail-method');
-        const saleDetailTotalSpan = document.getElementById('sale-detail-total');
-        const saleDetailItemsList = document.getElementById('sale-detail-items');
-        const saleDetailReceivedCustomerSpan = document.getElementById('sale-detail-received-customer');
         const saleDetailExchangeRateSpan = document.getElementById('sale-detail-exchange-rate');
-        const saleDetailChangeGivenSpan = document.getElementById('sale-detail-change-given');
-        const saleDetailReceivedNetSpan = document.getElementById('sale-detail-received-net');
+        const saleDetailReceivedCustomerUsdSpan = document.getElementById('sale-detail-received-customer-usd');
+        const saleDetailReceivedCustomerBsSpan = document.getElementById('sale-detail-received-customer-bs');
+        const saleDetailChangeGivenUsdSpan = document.getElementById('sale-detail-change-given-usd');
+        const saleDetailChangeGivenBsSpan = document.getElementById('sale-detail-change-given-bs');
+        const saleDetailReceivedNetUsdSpan = document.getElementById('sale-detail-received-net-usd');
+        const saleDetailReceivedNetBsSpan = document.getElementById('sale-detail-received-net-bs');
+        const saleDetailTotalUsdSpan = document.getElementById('sale-detail-total-usd');
+        const saleDetailTotalBsSpan = document.getElementById('sale-detail-total-bs');
+        const saleDetailItemsList = document.getElementById('sale-detail-items');
+        const deleteSaleFromModalButton = document.getElementById('delete-sale-from-modal'); // New delete button in modal
+
 
         // Sales Report Summary Elements
         const totalSalesUsdSpan = document.getElementById('total-sales-usd');
@@ -669,7 +988,7 @@
         const usdChangeUsdRadio = document.getElementById('usd-change-usd');
         const usdChangeVesRadio = document.getElementById('usd-change-ves');
 
-        // Export Buttons
+        // Export Button
         const exportSalesButton = document.getElementById('export-sales-button');
 
         // CSV Import Elements
@@ -684,6 +1003,13 @@
         // Variables to store current bill totals for the payment modal
         let currentBillTotalUSD = 0;
         let currentBillTotalBS = 0;
+
+        // Chart elements and instance (Now in floating panel)
+        const chartFloatingPanel = document.getElementById('chart-floating-panel');
+        const toggleChartPanelButton = document.getElementById('toggle-chart-panel-button');
+        const chartPanelCloseButton = chartFloatingPanel.querySelector('.btn-close');
+        const salesChartContainer = document.getElementById('sales-chart-container');
+        let topProductsChart = null;
 
 
         // --- Data Persistence ---
@@ -753,7 +1079,7 @@
           const costUSD = product.costUSD;
           if (typeof costUSD !== "number" || costUSD < 0) {
             console.error("Costo inválido para calcular precios:", product);
-            return { priceUSD: 0, priceBS: 0 };
+            return { priceUSD: 0, priceBS: 0, profitUSD: 0 };
           }
 
           const salePriceUSD = costUSD * 1.3; // 30% profit margin
@@ -763,9 +1089,12 @@
           const decimalPart = salePriceBS % 1;
           salePriceBS = decimalPart >= 0.30 ? Math.ceil(salePriceBS) : Math.floor(salePriceBS);
 
+          const profitUSD = salePriceUSD - costUSD; // Profit per item in USD
+
           return {
             priceUSD: Number(salePriceUSD.toFixed(2)), // Keep USD with 2 decimals
             priceBS: Number(salePriceBS.toFixed(0)),   // Round BS to integer
+            profitUSD: Number(profitUSD.toFixed(2))    // Profit in USD
           };
         }
 
@@ -780,12 +1109,13 @@
             product.stock > 0 && product.name.toLowerCase().includes(lowerCaseSearchTerm)
           );
 
-          productsList.innerHTML = homeFilteredProducts.length > 0
+          productsListTbody.innerHTML = homeFilteredProducts.length > 0
             ? homeFilteredProducts.map(product => {
                 const prices = calculatePrices(product);
                 const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
+                // Add data-id attribute to the row for easy access
                 return `
-                  <tr class="${rowClass}">
+                  <tr class="${rowClass} clickable-row" data-id="${product.id}">
                       <td>${product.name}</td>
                       <td>${prices.priceUSD.toFixed(2)}$</td>
                       <td>${prices.priceBS.toFixed(0)}Bs</td>
@@ -801,28 +1131,21 @@
 
 
           // Render all products for the Management tab
-          managementList.innerHTML = AppState.products.length > 0
+          managementListTbody.innerHTML = AppState.products.length > 0
             ? AppState.products.map(product => {
                 const prices = calculatePrices(product);
                 const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
+                 // Add data-id attribute to the row for easy access
                 return `
-                  <tr class="${rowClass}">
+                  <tr class="${rowClass} clickable-row" data-id="${product.id}">
                       <td>${product.name}</td>
                       <td>${product.costUSD.toFixed(2)}$</td>
                       <td>${prices.priceUSD.toFixed(2)}$</td>
                       <td>${prices.priceBS.toFixed(0)}Bs</td>
                       <td>${product.stock}</td>
-                      <td>
-                          <button class="btn btn-sm btn-warning me-2" onclick="editProduct('${product.id}')">
-                              <i class="bi bi-pencil"></i> Editar
-                          </button>
-                          <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}')">
-                              <i class="bi bi-trash"></i> Eliminar
-                          </button>
-                      </td>
-                  </tr>`;
+                      </tr>`;
               }).join("")
-            : `<tr><td colspan="6" class="text-center text-muted">No hay productos registrados.</td></tr>`;
+            : `<tr><td colspan="5" class="text-center text-muted">No hay productos registrados.</td></tr>`; // Adjusted colspan
         }
 
         // Updates the display of the current bill and its total
@@ -864,22 +1187,58 @@
           checkBillAndToggleFacturarButton(); // Update button state
         }
 
-        // Renders the sales history table, optionally filtered by date, and calculates summary totals
-        function renderSales(startDate = null, endDate = null) {
-            let filteredSales = AppState.sales;
+        // Renders the sales history list based on the selected filter (Replacing Table)
+        function renderSales(filterType = 'all') {
+            let filteredSales = [];
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Start of today
 
-            // Apply date filtering if dates are provided
-            if (startDate || endDate) {
-                const start = startDate ? new Date(startDate + 'T00:00:00') : null; // Set time to start of day
-                const end = endDate ? new Date(endDate + 'T23:59:59') : null;     // Set time to end of day
-
-                filteredSales = AppState.sales.filter(sale => {
-                    const saleDate = new Date(sale.date);
-                    let isWithinRange = true;
-                    if (start && saleDate < start) isWithinRange = false;
-                    if (end && saleDate > end) isWithinRange = false;
-                    return isWithinRange;
-                });
+            switch (filterType) {
+                case 'today':
+                    filteredSales = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        saleDate.setHours(0, 0, 0, 0);
+                        return saleDate.getTime() === now.getTime();
+                    });
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    filteredSales = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        saleDate.setHours(0, 0, 0, 0);
+                        return saleDate.getTime() === yesterday.getTime();
+                    });
+                    break;
+                case 'this-week':
+                    const firstDayOfWeek = new Date(now);
+                    firstDayOfWeek.setDate(now.getDate() - now.getDay()); // Adjust to Sunday (or Monday if locale changes)
+                     firstDayOfWeek.setHours(0, 0, 0, 0); // Ensure start of day
+                    filteredSales = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfWeek;
+                    });
+                    break;
+                case 'this-month':
+                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                     firstDayOfMonth.setHours(0, 0, 0, 0); // Ensure start of day
+                    filteredSales = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfMonth;
+                    });
+                    break;
+                 case 'this-year':
+                    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+                     firstDayOfYear.setHours(0, 0, 0, 0); // Ensure start of day
+                    filteredSales = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfYear;
+                    });
+                    break;
+                case 'all':
+                default:
+                    filteredSales = AppState.sales;
+                    break;
             }
 
             // Calculate Sales Summary for the filtered sales
@@ -888,16 +1247,33 @@
             let totalReceivedNetUSD = 0;
             let totalReceivedNetBS = 0;
 
+            // Aggregate product quantities for the chart
+            const productSalesCount = {};
             filteredSales.forEach(sale => {
                 totalFilteredSalesUSD += sale.totalUSD;
                 totalFilteredSalesBS += sale.totalBS;
 
-                // Calculate net received for summary using stored values
                 const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                 const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
                 totalReceivedNetUSD += actualReceivedUSD;
                 totalReceivedNetBS += actualReceivedBS;
+
+                sale.items.forEach(item => {
+                    if (!productSalesCount[item.name]) {
+                        productSalesCount[item.name] = 0;
+                    }
+                    productSalesCount[item.name] += item.quantity;
+                });
             });
+
+            // Sort products by quantity sold (descending) and get top N (e.g., top 10)
+            const sortedProducts = Object.entries(productSalesCount)
+                .sort(([, quantityA], [, quantityB]) => quantityB - quantityA)
+                .slice(0, 10); // Get top 10 products
+
+            const topProductNames = sortedProducts.map(([name]) => name);
+            const topProductQuantities = sortedProducts.map(([, quantity]) => quantity);
+
 
             // Update summary display
             totalSalesUsdSpan.textContent = `${totalFilteredSalesUSD.toFixed(2)}$`;
@@ -905,32 +1281,140 @@
             totalReceivedUsdSpan.textContent = `${totalReceivedNetUSD.toFixed(2)}$`;
             totalReceivedBsSpan.textContent = `${totalReceivedNetBS.toFixed(0)}Bs`;
 
-            // Render the sales history table
+            // Update the chart - Now showing top products
+            // Check if the floating chart panel is currently visible before updating the chart
+            if (chartFloatingPanel.classList.contains('show')) {
+                 updateTopProductsChart(topProductNames, topProductQuantities);
+            }
+
+
+            // Render the sales history list (Replacing Table)
             if (filteredSales.length === 0) {
-             salesHistoryTbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No hay ventas registradas${(startDate || endDate) ? ' para este rango de fechas' : ''}.</td></tr>`;
+             salesHistoryListDiv.innerHTML = `<p class="text-center text-muted">No hay ventas registradas para este período.</p>`;
             } else {
-             salesHistoryTbody.innerHTML = filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending by date
+             salesHistoryListDiv.innerHTML = filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending by date
                .map(sale => {
                     // Calculate net received for this specific row display
                     const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                     const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
 
                     return `
-                        <tr class="clickable-row" onclick="viewSaleDetail('${sale.date}')">
-                            <td>${new Date(sale.date).toLocaleDateString()} ${new Date(sale.date).toLocaleTimeString()}</td>
-                            <td>${sale.items.map(item => `${item.name} (x${item.quantity})`).join(", ")}</td>
-                            <td>${sale.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
-                            <td>${sale.totalUSD.toFixed(2)}$</td>
-                            <td>${sale.totalBS.toFixed(0)}Bs</td>
-                            <td>${sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A'}</td>
-                            <td>${sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A'}</td>
-                            <td>${actualReceivedUSD.toFixed(2)}$</td>
-                            <td>${actualReceivedBS.toFixed(0)}Bs</td>
-                        </tr>
+                        <div class="sale-item-card" data-date="${sale.date}"> <div class="sale-item-header">
+                                <span class="sale-date">${new Date(sale.date).toLocaleDateString()} ${new Date(sale.date).toLocaleTimeString()}</span>
+                                </div>
+                            <div class="sale-item-details">
+                                <p class="mb-1"><strong>Total Venta:</strong> ${sale.totalUSD.toFixed(2)}$ | ${sale.totalBS.toFixed(0)}Bs</p>
+                                <p class="mb-1"><strong>Recibido Neto:</strong> ${actualReceivedUSD.toFixed(2)}$ | ${Math.round(actualReceivedBS).toFixed(0)}Bs</p>
+                                <p class="mb-1"><strong>Método de Pago:</strong> ${sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A'} (Tasa: ${sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A'} Bs/$)</p>
+                            </div>
+                            <div class="sale-item-products">
+                                <strong>Productos:</strong> ${sale.items.map(item => `${item.name} (x${item.quantity})`).join(", ")}
+                            </div>
+                        </div>
                     `;
                 }).join("");
             }
         }
+
+        // Initializes or updates the Chart.js bar chart for top selling products
+        function updateTopProductsChart(productNames, quantities) {
+            const ctx = document.getElementById('top-products-chart').getContext('2d');
+
+            const data = {
+                labels: productNames, // Product names on the X-axis
+                datasets: [{
+                    label: 'Cantidad Vendida',
+                    data: quantities,
+                    backgroundColor: [ /* More colors for better visual separation */
+                        'rgba(37, 99, 235, 0.8)', /* primary-color */
+                        'rgba(59, 130, 246, 0.8)', /* secondary-color */
+                        'rgba(16, 185, 129, 0.8)', /* emerald-500 */
+                        'rgba(245, 158, 11, 0.8)', /* amber-500 */
+                        'rgba(239, 68, 68, 0.8)',  /* red-500 */
+                        'rgba(147, 51, 234, 0.8)', /* violet-500 */
+                        'rgba(236, 72, 153, 0.8)', /* pink-500 */
+                        'rgba(34, 197, 94, 0.8)',  /* green-500 */
+                        'rgba(249, 115, 22, 0.8)',  /* orange-500 */
+                        'rgba(107, 114, 128, 0.8)' /* slate-500 */
+                    ],
+                    borderColor: [ /* Matching border colors */
+                        'rgba(37, 99, 235, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(147, 51, 234, 1)',
+                        'rgba(236, 72, 153, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(107, 114, 128, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const options = {
+                 responsive: true,
+                 maintainAspectRatio: false, // Allow container to control size
+                 plugins: {
+                    legend: {
+                        display: false, // Hide legend for a single dataset bar chart
+                    },
+                    title: {
+                        display: true,
+                        text: `Productos Más Vendidos (${salesFilterSelect.options[salesFilterSelect.selectedIndex].text})` // Dynamic title based on filter
+                    },
+                     tooltip: {
+                        callbacks: {
+                             label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.raw;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                 scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Producto'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Cantidad Vendida'
+                        },
+                         ticks: {
+                             beginAtZero: true,
+                              callback: function(value) {
+                                 if (Number.isInteger(value)) {
+                                     return value;
+                                 }
+                                 return null; // Only show integer ticks
+                             },
+                             stepSize: 1 // Ensure steps are integers
+                         }
+                    }
+                }
+            };
+
+
+            if (topProductsChart) {
+                topProductsChart.destroy(); // Destroy existing chart before creating a new one
+            }
+
+             // Only create chart if there is data
+            if (productNames.length > 0) {
+                topProductsChart = new Chart(ctx, {
+                    type: 'bar', // Use bar chart for top products
+                    data: data,
+                    options: options
+                });
+            }
+        }
+
 
         // --- Product Actions ---
 
@@ -968,7 +1452,7 @@
           showMessage("Producto guardado con éxito!", 'success');
         });
 
-        // Deletes a product after confirmation (exposed globally for onclick)
+        // Deletes a product after confirmation (called from modal or directly)
         window.deleteProduct = function (id) {
           const productIndex = AppState.products.findIndex(p => p.id === id);
           if (productIndex === -1) {
@@ -984,23 +1468,26 @@
               return;
           }
 
-          // Optional: Add check for sales history if strict deletion is needed
-          // const isInSales = AppState.sales.some(sale => sale.items.some(item => item.id === id));
-          // if (isInSales) {
-          //     showMessage(`No se puede eliminar "${productName}" porque existe en el historial de ventas.`, 'warning');
-          //     return;
-          // }
+          // Check if product exists in any sale
+           const isInSales = AppState.sales.some(sale => sale.items.some(item => item.id === id));
+           if (isInSales) {
+               showMessage(`No se puede eliminar "${productName}" porque existe en el historial de ventas. Considera marcarlo como inactivo o con stock 0 en su lugar.`, 'warning');
+               return;
+           }
 
 
           if (confirm(`¿Estás seguro de que deseas eliminar el producto "${productName}"? Esta acción no se puede deshacer.`)) {
               AppState.products.splice(productIndex, 1); // Remove product from array
               saveData();
-              renderProducts(productSearchInput.value);
+              renderProducts(productSearchInput.value); // Re-render product lists
+              updateBillDisplay(); // Update bill display (in case it was in bill, though check above prevents this)
+              renderSales(salesFilterSelect.value); // Re-render sales with current filter
               showMessage(`Producto "${productName}" eliminado.`, 'success');
+              editProductModal.hide(); // Hide the modal after deletion
           }
         };
 
-        // Opens the edit product modal and populates it (exposed globally for onclick)
+        // Opens the edit product modal and populates it (triggered by row click)
         window.editProduct = function(id) {
             const productToEdit = AppState.products.find(p => p.id === id);
             if (!productToEdit) {
@@ -1014,6 +1501,9 @@
             editProductNameInput.value = productToEdit.name;
             editProductPriceInput.value = productToEdit.costUSD.toFixed(2); // Populate with cost, formatted
             editProductStockInput.value = productToEdit.stock;
+
+            // Store the product ID on the delete button for easy access
+            deleteProductFromModalButton.dataset.productId = productToEdit.id;
 
             editProductModal.show(); // Show the modal
         };
@@ -1053,7 +1543,7 @@
                 saveData();
                 renderProducts(productSearchInput.value); // Re-render product lists
                 updateBillDisplay(); // Update bill if the edited product is in it
-                renderSales(startDateInput.value, endDateInput.value); // Re-render sales in case price affects history display (unlikely but safe)
+                renderSales(salesFilterSelect.value); // Re-render sales with current filter
                 showMessage("Producto actualizado con éxito!", 'success');
                 editProductModal.hide(); // Hide the modal
             } else {
@@ -1061,6 +1551,15 @@
                 showMessage("Error al actualizar el producto.", 'danger');
             }
         });
+
+        // Event listener for the delete button inside the edit product modal
+        deleteProductFromModalButton.addEventListener('click', () => {
+            const productId = deleteProductFromModalButton.dataset.productId; // Get ID from data attribute
+            if (productId) {
+                deleteProduct(productId); // Call the delete function
+            }
+        });
+
 
         // --- Bill Actions ---
 
@@ -1302,10 +1801,11 @@
                            usdChangeOptionsDiv.classList.remove('hidden'); // Show change options
                            const changeCurrency = document.querySelector('input[name="usd-change-currency"]:checked').value;
                            if (changeCurrency === 'usd') {
-                               paymentChangeP.textContent = `Vuelto: ${differenceUSD.toFixed(2)}$`;
+                               changeGivenUSD = parseFloat(differenceUSD.toFixed(2)); // Store change in USD
+                               paymentChangeP.textContent = `Vuelto: ${changeGivenUSD.toFixed(2)}$`;
                            } else {
-                               const vueltoVES = Math.round(differenceUSD * exchangeRate);
-                               paymentChangeP.textContent = `Vuelto: ${vueltoVES.toFixed(0)}Bs`;
+                               changeGivenBS = Math.round(differenceUSD * exchangeRate); // Store change in VES
+                               paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`;
                            }
                         } else { // Pago exacto
                             paymentStatusP.textContent = 'Pago exacto.';
@@ -1314,7 +1814,6 @@
                 }
 
             } else if (method === 'ves') {
-                // *** MODIFIED VES LOGIC ***
                 isValid = validateIntegerInput(amountReceivedVesInput, amountReceivedVesError, "Solo números enteros positivos.");
                 receivedVES_val = parseInt(amountReceivedVesInput.value) || 0;
 
@@ -1327,13 +1826,13 @@
                         isPaymentSufficient = true; // Payment is sufficient
                         if (differenceVES > 0) { // Vuelto
                            paymentStatusP.textContent = 'Pago completo.';
-                           paymentChangeP.textContent = `Vuelto: ${differenceVES.toFixed(0)}Bs`; // Change is always in VES
+                           changeGivenBS = differenceVES; // Change is directly the positive difference in VES
+                           paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`; // Change is always in VES
                         } else { // Pago exacto
                             paymentStatusP.textContent = 'Pago exacto.';
                         }
                     }
                 }
-                // *** END OF MODIFIED VES LOGIC ***
 
             } else if (method === 'mixed') {
                 const usdValid = validateIntegerInput(amountReceivedMixedUsdInput, amountReceivedMixedUsdError, "Solo números enteros positivos.");
@@ -1355,9 +1854,9 @@
                         isPaymentSufficient = true; // Payment is sufficient
                         if (differenceUSD > 0.001) { // Vuelto
                             paymentStatusP.textContent = 'Pago completo.';
-                            // Default change in VES for mixed payments
-                            const vueltoVES = Math.round(differenceUSD * exchangeRate);
-                            paymentChangeP.textContent = `Vuelto: ${vueltoVES.toFixed(0)}Bs`;
+                            // Default to giving change in VES for mixed payments
+                            changeGivenBS = Math.round(differenceUSD * exchangeRate);
+                            paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`;
                         } else { // Pago exacto
                             paymentStatusP.textContent = 'Pago exacto.';
                         }
@@ -1394,13 +1893,11 @@
                     }
                 }
             } else if (method === 'ves') {
-                // *** MODIFIED VES CHANGE CALCULATION ***
                 receivedBS_customer = parseInt(amountReceivedVesInput.value) || 0;
                 const difference_ves = receivedBS_customer - currentBillTotalBS; // Direct difference in VES
                  if (difference_ves > 0) { // If change is due
                     changeGivenBS = difference_ves; // Change is directly the positive difference in VES
                  }
-                 // *** END OF MODIFIED VES CHANGE CALCULATION ***
             } else if (method === 'mixed') {
                 receivedUSD_customer = parseInt(amountReceivedMixedUsdInput.value) || 0;
                 receivedBS_customer = parseInt(amountReceivedMixedVesInput.value) || 0;
@@ -1418,12 +1915,13 @@
                  date: new Date().toISOString(), // Store date as ISO string for consistency
                  items: AppState.currentBill.map(item => {
                      const product = AppState.products.find(p => p.id === item.id);
-                     const pricesAtSale = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0 };
+                     const pricesAtSale = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0, profitUSD: 0 };
                      return {
                          id: item.id,
                          name: item.name,
                          quantity: item.quantity,
-                         pricesAtSale: pricesAtSale, // Store calculated prices at the time of sale
+                         pricesAtSale: pricesAtSale, // Store calculated prices at the time of sale (includes profit)
+                         costUSD: product ? product.costUSD : 0 // Also store cost at time of sale for profit calculation in reports
                      };
                  }),
                  totalUSD: currentBillTotalUSD,
@@ -1442,7 +1940,7 @@
 
              // --- Update UI ---
              updateBillDisplay(); // Update bill display (will show empty)
-             renderSales(startDateInput.value, endDateInput.value); // Update sales history
+             renderSales(salesFilterSelect.value); // Update sales history with current filter
              renderProducts(productSearchInput.value); // Update product stock display (already updated during bill modification)
 
              paymentModal.hide(); // Hide the payment modal
@@ -1457,7 +1955,7 @@
 
         // --- Sale Detail Logic ---
 
-        // Displays details of a specific sale in a modal (exposed globally for onclick)
+        // Displays details of a specific sale in a modal (triggered by card click)
         window.viewSaleDetail = function(saleDateISOString) {
             const sale = AppState.sales.find(s => s.date === saleDateISOString);
             if (!sale) {
@@ -1469,20 +1967,26 @@
             // Populate modal fields
             saleDetailDateSpan.textContent = new Date(sale.date).toLocaleString('es-VE'); // Format date/time
             saleDetailMethodSpan.textContent = sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A';
+            saleDetailExchangeRateSpan.textContent = sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A';
 
             // Display amounts exactly as stored (what customer gave, what change was given)
-            saleDetailReceivedCustomerSpan.textContent = `${(sale.receivedUSD_customer || 0).toFixed(0)}$ + ${(sale.receivedBS_customer || 0).toFixed(0)}Bs`;
+            saleDetailReceivedCustomerUsdSpan.textContent = `${(sale.receivedUSD_customer || 0).toFixed(0)}$`;
+            saleDetailReceivedCustomerBsSpan.textContent = `${(sale.receivedBS_customer || 0).toFixed(0)}Bs`;
             // Ensure changeGivenBS is displayed as integer
-            saleDetailChangeGivenSpan.textContent = `${(sale.changeGivenUSD || 0).toFixed(2)}$ | ${Math.round(sale.changeGivenBS || 0).toFixed(0)}Bs`;
+            saleDetailChangeGivenUsdSpan.textContent = `${(sale.changeGivenUSD || 0).toFixed(2)}$`;
+            saleDetailChangeGivenBsSpan.textContent = `${Math.round(sale.changeGivenBS || 0).toFixed(0)}Bs`;
+
 
             // Calculate and display net received
             const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
             const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
             // Ensure net received BS is displayed as integer
-            saleDetailReceivedNetSpan.textContent = `${actualReceivedUSD.toFixed(2)}$ | ${Math.round(actualReceivedBS).toFixed(0)}Bs`;
+            saleDetailReceivedNetUsdSpan.textContent = `${actualReceivedUSD.toFixed(2)}$`;
+            saleDetailReceivedNetBsSpan.textContent = `${Math.round(actualReceivedBS).toFixed(0)}Bs`;
 
-            saleDetailTotalSpan.textContent = `${sale.totalUSD.toFixed(2)}$ | ${sale.totalBS.toFixed(0)}Bs`;
-            saleDetailExchangeRateSpan.textContent = sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A';
+            saleDetailTotalUsdSpan.textContent = `${sale.totalUSD.toFixed(2)}$`;
+            saleDetailTotalBsSpan.textContent = `${sale.totalBS.toFixed(0)}Bs`;
+
 
             // Populate item list using prices stored at the time of sale
             saleDetailItemsList.innerHTML = sale.items.map(item => {
@@ -1491,13 +1995,58 @@
                 return `
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span>${item.name} (x${item.quantity})</span>
-                        <span class="badge bg-light text-dark rounded-pill">${item.pricesAtSale?.priceUSD?.toFixed(2)}$ | ${item.pricesAtSale?.priceBS?.toFixed(0)}Bs</span>
+                        <span class="badge bg-light text-dark rounded-pill">${itemTotalUSD.toFixed(2)}$ | ${itemTotalBS.toFixed(0)}Bs</span>
                     </li>
                 `;
             }).join('');
 
+            // Store the sale date on the delete button for easy access
+            deleteSaleFromModalButton.dataset.saleDate = sale.date;
+
+
             saleDetailModal.show(); // Show the modal
         };
+
+         // Deletes a sale and returns items to stock (called from modal or directly)
+        window.deleteSale = function(saleDateISOString) {
+            const saleIndex = AppState.sales.findIndex(s => s.date === saleDateISOString);
+            if (saleIndex === -1) {
+                console.error("Venta no encontrada para eliminar:", saleDateISOString);
+                showMessage("Error: Venta no encontrada para eliminar.", 'danger');
+                return;
+            }
+
+            if (confirm(`¿Estás seguro de que deseas eliminar esta venta (${new Date(saleDateISOString).toLocaleString()})? Los productos serán devueltos al inventario.`)) {
+                const deletedSale = AppState.sales.splice(saleIndex, 1)[0]; // Remove and get the sale
+
+                // Return items to stock
+                deletedSale.items.forEach(item => {
+                    const product = AppState.products.find(p => p.id === item.id);
+                    if (product) {
+                        product.stock += item.quantity;
+                    } else {
+                        console.warn(`Producto con ID ${item.id} no encontrado en el inventario al eliminar la venta. No se pudo devolver el stock.`);
+                        // Optionally log this or show a specific message
+                         showMessage(`Advertencia: Producto "${item.name}" no encontrado en inventario. No se pudo devolver el stock.`, 'warning');
+                    }
+                });
+
+                saveData();
+                renderSales(salesFilterSelect.value); // Re-render sales history with current filter
+                renderProducts(productSearchInput.value); // Update product stock display
+                showMessage("Venta eliminada y stock devuelto.", 'success');
+                saleDetailModal.hide(); // Hide the modal after deletion
+            }
+        };
+
+        // Event listener for the delete button inside the sale detail modal
+        deleteSaleFromModalButton.addEventListener('click', () => {
+            const saleDate = deleteSaleFromModalButton.dataset.saleDate; // Get date from data attribute
+            if (saleDate) {
+                deleteSale(saleDate); // Call the delete function
+            }
+        });
+
 
         // --- Data Export Functions ---
 
@@ -1532,34 +2081,89 @@
             }
         }
 
-        // Exports sales data to CSV
+        // Exports sales data to CSV based on the currently applied filter date
         exportSalesButton.addEventListener('click', () => {
-             const filteredSales = AppState.sales.filter(sale => {
-                const start = startDateInput.value ? new Date(startDateInput.value + 'T00:00:00') : null;
-                const end = endDateInput.value ? new Date(endDateInput.value + 'T23:59:59') : null;
-                const saleDate = new Date(sale.date);
-                let isWithinRange = true;
-                if (start && saleDate < start) isWithinRange = false;
-                if (end && saleDate > end) isWithinRange = false;
-                return isWithinRange;
-            });
+             const filterType = salesFilterSelect.value;
+             let salesToExport = [];
+             const now = new Date();
+             now.setHours(0, 0, 0, 0);
 
-            if (filteredSales.length === 0) {
-                showMessage("No hay ventas para exportar en el rango de fechas seleccionado.", 'info');
+             // Re-apply filter logic to get the correct sales subset for export
+             switch (filterType) {
+                case 'today':
+                    salesToExport = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        saleDate.setHours(0, 0, 0, 0);
+                        return saleDate.getTime() === now.getTime();
+                    });
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                     salesToExport = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        saleDate.setHours(0, 0, 0, 0);
+                        return saleDate.getTime() === yesterday.getTime();
+                    });
+                    break;
+                case 'this-week':
+                    const firstDayOfWeek = new Date(now);
+                    firstDayOfWeek.setDate(now.getDate() - now.getDay()); // Adjust to Sunday (or Monday)
+                     firstDayOfWeek.setHours(0, 0, 0, 0);
+                     salesToExport = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfWeek;
+                    });
+                    break;
+                case 'this-month':
+                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                     firstDayOfMonth.setHours(0, 0, 0, 0);
+                     salesToExport = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfMonth;
+                    });
+                    break;
+                 case 'this-year':
+                    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+                     firstDayOfYear.setHours(0, 0, 0, 0);
+                     salesToExport = AppState.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= firstDayOfYear;
+                    });
+                    break;
+                case 'all':
+                default:
+                    salesToExport = AppState.sales;
+                    break;
+             }
+
+
+            if (salesToExport.length === 0) {
+                showMessage("No hay ventas para exportar en el período seleccionado.", 'info');
                 return;
             }
 
             const header = [
                 "Fecha", "Productos", "Cantidad Total", "Total Venta ($)", "Total Venta (Bs)",
                 "Método de Pago", "Tasa Cambio", "Recibido Cliente ($)", "Recibido Cliente (Bs)",
-                "Vuelto Entregado ($)", "Vuelto Entregado (Bs)", "Recibido Neto ($)", "Recibido Neto (Bs)"
+                "Vuelto Entregado ($)", "Vuelto Entregado (Bs)", "Recibido Neto ($)", "Recibido Neto (Bs)",
+                "Ganancia Estimada ($)" // Added profit column
             ];
 
-            const rows = filteredSales.map(sale => {
+            const rows = salesToExport.map(sale => {
                  const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; "); // Use semicolon for item separation within cell
                  const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
                  const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                  const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
+
+                 // Calculate profit for this sale row
+                 let saleProfitUSD = 0;
+                 sale.items.forEach(item => {
+                     const itemCostUSD = item.costUSD !== undefined ? item.costUSD : (AppState.products.find(p => p.id === item.id)?.costUSD || 0);
+                     const itemSalePriceUSD = item.pricesAtSale?.priceUSD || 0;
+                     saleProfitUSD += (itemSalePriceUSD - itemCostUSD) * item.quantity;
+                 });
+
 
                 return [
                     escapeCsvField(new Date(sale.date).toLocaleString('es-VE')),
@@ -1574,12 +2178,13 @@
                     escapeCsvField((sale.changeGivenUSD || 0).toFixed(2)),
                     escapeCsvField(Math.round(sale.changeGivenBS || 0).toFixed(0)),
                     escapeCsvField(actualReceivedUSD.toFixed(2)),
-                    escapeCsvField(Math.round(actualReceivedBS).toFixed(0))
+                    escapeCsvField(Math.round(actualReceivedBS).toFixed(0)),
+                    escapeCsvField(saleProfitUSD.toFixed(2)) // Add profit to CSV row
                 ].join(',');
             });
 
             const csvContent = [header.join(','), ...rows].join('\n');
-            const filename = `ventas_papeleria_${startDateInput.value || 'inicio'}_${endDateInput.value || 'fin'}.csv`;
+            const filename = `ventas_papeleria_export_${filterType || 'todas'}_${new Date().toISOString().slice(0,10)}.csv`; // Dynamic filename
             downloadCsv(csvContent, filename);
             showMessage("Ventas exportadas a CSV.", 'success');
         });
@@ -1697,7 +2302,8 @@
             // Re-render affected parts of the UI
             renderProducts(productSearchInput.value);
             updateBillDisplay();
-            renderSales(startDateInput.value, endDateInput.value); // Re-render sales as BS totals might change display slightly
+            renderSales(salesFilterSelect.value); // Re-render sales with current filter
+            // No need to re-render cash closing report automatically, user will generate it
             showMessage("Tasa de cambio actualizada.", 'info', 3000); // Short duration message
           } else {
               // Provide feedback without alert if possible, maybe input validation styling
@@ -1720,19 +2326,37 @@
             renderProducts(e.target.value);
         });
 
-        // Applies date filters to the sales history
-        filterSalesButton.addEventListener('click', () => {
-            renderSales(startDateInput.value, endDateInput.value);
-             showMessage("Filtro de ventas aplicado.", 'info', 3000);
+        // Filters the sales history when the filter select changes
+        salesFilterSelect.addEventListener('change', (e) => {
+            renderSales(e.target.value);
+            showMessage(`Filtro de ventas cambiado a "${e.target.options[e.target.selectedIndex].text}".`, 'info', 3000);
         });
 
-        // Clears date filters and shows all sales
-        clearSalesFilterButton.addEventListener('click', () => {
-            startDateInput.value = '';
-            endDateInput.value = '';
-            renderSales(); // Render all sales
-            showMessage("Filtro de ventas limpiado.", 'info', 3000);
+        // Toggle the floating chart panel
+        toggleChartPanelButton.addEventListener('click', () => {
+            chartFloatingPanel.classList.toggle('show');
+            // If the panel is shown, update the chart
+            if (chartFloatingPanel.classList.contains('show')) {
+                 renderSales(salesFilterSelect.value); // This will trigger chart update if visible
+            } else {
+                 // Destroy chart when hidden
+                 if (topProductsChart) {
+                     topProductsChart.destroy();
+                     topProductsChart = null;
+                 }
+            }
         });
+
+        // Close button for the floating chart panel
+         chartPanelCloseButton.addEventListener('click', () => {
+            chartFloatingPanel.classList.remove('show');
+             // Destroy chart when hidden
+             if (topProductsChart) {
+                 topProductsChart.destroy();
+                 topProductsChart = null;
+             }
+         });
+
 
         // Clears all data from localStorage after confirmation
         if (clearStorageButton) {
@@ -1753,18 +2377,67 @@
                         updateBillDisplay();
                         exchangeRateInput.value = AppState.exchangeRate.toFixed(2);
                         productSearchInput.value = ''; // Clear search
-                        startDateInput.value = ''; // Clear date filters
-                        endDateInput.value = '';
+                        salesFilterSelect.value = 'all'; // Reset sales filter
+                        // Destroy chart if it exists
+                        if(topProductsChart) {
+                           topProductsChart.destroy();
+                           topProductsChart = null;
+                        }
+                         // Hide the floating chart panel on clear data
+                         chartFloatingPanel.classList.remove('show');
+
                         showMessage('Todos los datos han sido eliminados permanentemente.', 'success');
                     }
                 }
             });
         }
 
+        // --- Event Delegation for Clickable Rows/Cards ---
+
+        // Event listener for clicks on the product lists (Home and Products tabs)
+        // Use event delegation on the tbody
+        productsListTbody.addEventListener('click', handleProductRowClick);
+        managementListTbody.addEventListener('click', handleProductRowClick);
+
+        function handleProductRowClick(event) {
+            // Find the closest row (<tr>) that was clicked
+            const row = event.target.closest('tr.clickable-row');
+            if (row) {
+                const productId = row.dataset.id; // Get the product ID from the data attribute
+                 // Check if the click was on the "Agregar" button in the home tab
+                const addButton = event.target.closest('button.btn-primary');
+                 if (addButton && row.parentElement.id === 'products-list') {
+                     // If it was the add button in the home list, let that click handler run
+                     // The onclick attribute on the button will handle this
+                     return;
+                 }
+
+                // Otherwise, open the edit modal
+                if (productId) {
+                    editProduct(productId); // Call the edit function
+                }
+            }
+        }
+
+
+        // Event listener for clicks on the sales history list (Sales tab)
+        // Use event delegation on the sales history list div
+        salesHistoryListDiv.addEventListener('click', (event) => {
+            // Find the closest sale item card (div.sale-item-card) that was clicked
+            const saleCard = event.target.closest('.sale-item-card');
+            if (saleCard) {
+                const saleDate = saleCard.dataset.date; // Get the sale date from the data attribute
+                if (saleDate) {
+                    viewSaleDetail(saleDate); // Call the view sale detail function
+                }
+            }
+        });
+
+
         // --- Initial Application Load ---
         loadData(); // Load data from localStorage
         renderProducts(); // Render initial product lists
-        renderSales(); // Render initial sales history
+        renderSales(salesFilterSelect.value); // Render initial sales history with default filter ('all')
         updateBillDisplay(); // Render initial bill state
         checkBillAndToggleFacturarButton(); // Set initial state of the process button
 
