@@ -13,7 +13,9 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
     />
     <style>
+      /* --- Custom CSS Styles --- */
       :root {
+        /* Color Palette */
         --primary-color: #2563eb; /* Blue 600 */
         --secondary-color: #3b82f6; /* Blue 500 */
         --background-color: #f8fafc; /* Slate 50 */
@@ -39,13 +41,14 @@
         font-family: "Segoe UI", system-ui, sans-serif;
       }
 
-      /* Using Bootstrap's .active class directly now */
+      /* Active Nav Tab Styling */
       .nav-tabs .nav-link.active {
         color: var(--primary-color);
         border-bottom: 3px solid var(--primary-color);
         border-color: var(--primary-color) !important; /* Ensure border color is primary */
       }
 
+      /* Card Styling */
       .card {
         border: none;
         border-radius: 12px;
@@ -53,6 +56,7 @@
         background-color: var(--card-bg); /* Ensure cards have white background */
       }
 
+      /* Total Display Styling */
       .total-display {
         background: var(--primary-color);
         color: white;
@@ -61,6 +65,7 @@
         font-size: 1.2rem;
       }
 
+      /* Bill Item Styling */
       .bill-item {
         display: flex;
         justify-content: space-between;
@@ -90,17 +95,17 @@
        }
 
 
-      /* CSS for the hidden mixed payment div */
+      /* Utility class to hide elements */
       .hidden {
         display: none;
       }
 
-      /* Style for low stock products */
+      /* Low Stock Product Styling */
       .low-stock {
           background-color: #fef3c7; /* Light yellow background */
       }
 
-       /* Style for clickable table rows and sale item cards */
+       /* Clickable Row/Card Styling */
        .clickable-row,
        .sale-item-card {
            cursor: pointer;
@@ -116,20 +121,20 @@
        }
 
 
-       /* Style for sale detail modal item list */
+       /* Sale Detail Modal Item List Styling */
        #sale-detail-items .list-group-item {
            display: flex;
            justify-content: space-between;
        }
 
-       /* Style for error messages in modal */
+       /* Payment Error Message Styling */
        .payment-error {
            color: var(--danger-color); /* Bootstrap danger color */
            font-size: 0.875em;
            margin-top: 0.25rem;
        }
 
-       /* Style for the message area */
+       /* Message Area Styling */
        #message-area {
            position: fixed; /* Fixed position */
            top: 10px; /* 10px from the top */
@@ -139,7 +144,7 @@
            max-width: 90%; /* Maximum width */
        }
 
-       /* Style for grouping info in sale detail modal */
+       /* Sale Detail Modal Group Styling */
        .sale-detail-group {
            margin-bottom: 1rem;
            padding: 0.75rem;
@@ -154,16 +159,14 @@
            color: var(--primary-color);
        }
 
-        /* Style for the chart container */
+        /* Sales Chart Container Styling */
        #sales-chart-container {
            position: relative; /* Needed for canvas sizing */
            height: 300px; /* Set a height for the chart */
            width: 100%; /* Make it responsive */
-           /* Removed margin-top as it's now in a floating panel */
        }
 
-       /* New Sales Tab Layout Styles */
-
+       /* Sales Tab Layout Styles */
        .sales-header {
            display: flex;
            justify-content: space-between;
@@ -280,7 +283,6 @@
               border: 1px solid var(--border-color);
               border-radius: 8px;
               padding: 15px;
-              /* Removed margin-bottom as gap handles spacing */
               box-shadow: 0 1px 3px rgba(0,0,0,0.05);
               flex: 1 1 300px; /* Flex properties: grow, shrink, basis */
               max-width: calc(50% - 7.5px); /* Max width for two items per row (adjust gap) */
@@ -325,8 +327,6 @@
                 font-style: italic;
                 margin-bottom: 10px;
             }
-
-           /* Removed sale-item-actions as buttons are now in modal */
 
 
            /* General Button Consistency */
@@ -415,6 +415,12 @@
                   padding-bottom: 30px; /* Adjust value as needed */
               }
 
+              /* Style for calculated price fields */
+              .calculated-price {
+                  background-color: #e9ecef; /* Light grey background */
+                  cursor: not-allowed; /* Indicate it's not directly editable */
+              }
+
 
     </style>
   </head>
@@ -424,7 +430,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="#">
-          <i class="bi bi-shop-window me-2"></i>Papelería
+          <i class="bi bi-shop-window me-2"></i>Papelería Manager
         </a>
         <div class="d-flex align-items-center">
           <div class="exchange-rate-container bg-white p-2 rounded me-3">
@@ -512,8 +518,8 @@
                     <thead>
                       <tr>
                         <th>Producto</th>
-                        <th>Precio $</th>
-                        <th>Precio Bs</th>
+                        <th>Precio Venta $</th>
+                        <th>Precio Venta Bs</th>
                         <th>Existencia</th>
                         <th>Acciones</th> </tr>
                     </thead>
@@ -575,16 +581,50 @@
                       />
                     </div>
                     <div class="mb-3">
-                       <label for="product-price" class="form-label">Costo en $ (Precio de compra)</label>
+                       <label for="product-cost" class="form-label">Costo en $ (Precio de compra)</label>
                       <input
                         type="number"
                         step="0.01"
-                        id="product-price"
+                        id="product-cost"
                         class="form-control"
                         placeholder="Ej: 0.50"
                         required
                         min="0"
                       />
+                    </div>
+                    <div class="row g-2 mb-3">
+                       <div class="col-md-6">
+                           <label for="product-margin" class="form-label">Margen Ganancia (%)</label>
+                           <input
+                             type="number"
+                             step="0.01"
+                             id="product-margin"
+                             class="form-control"
+                             value="30" placeholder="Ej: 30"
+                             required
+                             min="0"
+                           />
+                       </div>
+                       <div class="col-md-6">
+                           <label for="product-sale-price-bs" class="form-label">Precio Venta Bs</label>
+                           <input
+                             type="number"
+                             step="1" id="product-sale-price-bs"
+                             class="form-control"
+                             placeholder="Calculado"
+                             min="0"
+                           />
+                       </div>
+                    </div>
+                    <div class="mb-3">
+                       <label for="product-sale-price-usd" class="form-label">Precio Venta $ (Calculado)</label>
+                       <input
+                         type="text"
+                         id="product-sale-price-usd"
+                         class="form-control calculated-price"
+                         readonly
+                         placeholder="Calculado"
+                       />
                     </div>
                     <div class="mb-3">
                        <label for="product-stock" class="form-label">Cantidad Inicial (Stock)</label>
@@ -630,7 +670,7 @@
                       <tr>
                         <th>Producto</th>
                         <th>Costo $</th>
-                        <th>Precio Venta $</th>
+                        <th>Margen %</th> <th>Precio Venta $</th>
                         <th>Precio Venta Bs</th>
                         <th>Existencia</th>
                         </tr>
@@ -665,7 +705,7 @@
                    <button id="export-sales-button" class="btn btn-secondary btn-sm me-2">
                        <i class="bi bi-file-earmark-excel me-2"></i>Exportar Ventas (CSV)
                    </button>
-                    <button id="toggle-chart-panel-button" class="btn btn-info btn-sm">
+                   <button id="toggle-chart-panel-button" class="btn btn-info btn-sm">
                        <i class="bi bi-bar-chart me-2"></i>Mostrar Gráfico
                    </button>
                </div>
@@ -694,7 +734,7 @@
                <h5><i class="bi bi-list-ul me-2"></i>Historial Detallado de Ventas</h5>
                <div id="sales-history-list">
                    <p class="text-center text-muted">No hay ventas registradas.</p>
-               </div>
+                   </div>
            </div>
         </div>
       </div>
@@ -739,8 +779,22 @@
                 <input type="text" id="edit-product-name" class="form-control" required>
               </div>
               <div class="mb-3">
-                 <label for="edit-product-price" class="form-label">Costo en $ (Precio de compra)</label>
-                <input type="number" step="0.01" id="edit-product-price" class="form-control" required min="0">
+                 <label for="edit-product-cost" class="form-label">Costo en $ (Precio de compra)</label>
+                <input type="number" step="0.01" id="edit-product-cost" class="form-control" required min="0">
+              </div>
+              <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                      <label for="edit-product-margin" class="form-label">Margen Ganancia (%)</label>
+                      <input type="number" step="0.01" id="edit-product-margin" class="form-control" required min="0">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="edit-product-sale-price-bs" class="form-label">Precio Venta Bs</label>
+                      <input type="number" step="1" id="edit-product-sale-price-bs" class="form-control" min="0">
+                  </div>
+              </div>
+              <div class="mb-3">
+                  <label for="edit-product-sale-price-usd" class="form-label">Precio Venta $ (Calculado)</label>
+                  <input type="text" id="edit-product-sale-price-usd" class="form-control calculated-price" readonly>
               </div>
               <div class="mb-3">
                  <label for="edit-product-stock" class="form-label">Cantidad (Stock)</label>
@@ -749,7 +803,7 @@
               <button type="submit" class="btn btn-primary w-100 mb-3">
                 <i class="bi bi-save me-2"></i>Guardar Cambios
               </button>
-               <button type="button" class="btn btn-danger w-100" id="delete-product-from-modal">
+              <button type="button" class="btn btn-danger w-100" id="delete-product-from-modal">
                    <i class="bi bi-trash me-2"></i>Eliminar Producto
                </button>
             </form>
@@ -898,7 +952,8 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-primary" id="confirm-payment-button" disabled>Confirmar Pago</button> </div>
+            <button type="button" class="btn btn-primary" id="confirm-payment-button" disabled>Confirmar Pago</button>
+          </div>
         </div>
       </div>
     </div>
@@ -910,9 +965,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         // --- Global State ---
         let AppState = {
-          products: [], // Array to store product objects {id, name, costUSD, stock}
+          products: [], // Array to store product objects {id, name, costUSD, stock, profitMargin}
           sales: [],    // Array to store sale objects {date, items, totalUSD, totalBS, paymentMethod, ...}
-          currentBill: [], // Array to store items currently in the bill {id, name, costUSD, quantity}
+          currentBill: [], // Array to store items currently in the bill {id, name, quantity}
           exchangeRate: 85.40, // Default exchange rate
         };
 
@@ -928,22 +983,36 @@
         const processBillButton = document.getElementById('process-bill-button');
         const messageArea = document.getElementById('message-area'); // Reference to the new message area
 
+        // New Product Form Elements
+        const productNameInput = document.getElementById("product-name");
+        const productCostInput = document.getElementById("product-cost");
+        const productMarginInput = document.getElementById("product-margin");
+        const productSalePriceBsInput = document.getElementById("product-sale-price-bs");
+        const productSalePriceUsdInput = document.getElementById("product-sale-price-usd");
+        const productStockInput = document.getElementById("product-stock");
+
+
         // Filtering and Searching Elements
         const productSearchInput = document.getElementById('product-search');
         const salesFilterSelect = document.getElementById('sales-filter');
 
 
         // Edit Product Modal Elements
-        const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+        const editProductModalElement = document.getElementById('editProductModal');
+        const editProductModal = new bootstrap.Modal(editProductModalElement);
         const editProductForm = document.getElementById('edit-product-form');
         const editProductIdInput = document.getElementById('edit-product-id');
         const editProductNameInput = document.getElementById('edit-product-name');
-        const editProductPriceInput = document.getElementById('edit-product-price'); // This is cost
+        const editProductCostInput = document.getElementById('edit-product-cost');
+        const editProductMarginInput = document.getElementById('edit-product-margin');
+        const editProductSalePriceBsInput = document.getElementById('edit-product-sale-price-bs');
+        const editProductSalePriceUsdInput = document.getElementById('edit-product-sale-price-usd');
         const editProductStockInput = document.getElementById('edit-product-stock');
-        const deleteProductFromModalButton = document.getElementById('delete-product-from-modal'); // New delete button in modal
+        const deleteProductFromModalButton = document.getElementById('delete-product-from-modal');
 
         // Sale Detail Modal Elements
-        const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
+        const saleDetailModalElement = document.getElementById('saleDetailModal');
+        const saleDetailModal = new bootstrap.Modal(saleDetailModalElement);
         const saleDetailDateSpan = document.getElementById('sale-detail-date');
         const saleDetailMethodSpan = document.getElementById('sale-detail-method');
         const saleDetailExchangeRateSpan = document.getElementById('sale-detail-exchange-rate');
@@ -956,7 +1025,7 @@
         const saleDetailTotalUsdSpan = document.getElementById('sale-detail-total-usd');
         const saleDetailTotalBsSpan = document.getElementById('sale-detail-total-bs');
         const saleDetailItemsList = document.getElementById('sale-detail-items');
-        const deleteSaleFromModalButton = document.getElementById('delete-sale-from-modal'); // New delete button in modal
+        const deleteSaleFromModalButton = document.getElementById('delete-sale-from-modal');
 
 
         // Sales Report Summary Elements
@@ -966,7 +1035,8 @@
         const totalReceivedBsSpan = document.getElementById('total-received-bs');
 
         // Payment Modal Elements
-        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        const paymentModalElement = document.getElementById('paymentModal');
+        const paymentModal = new bootstrap.Modal(paymentModalElement);
         const paymentModalTotalUsdSpan = document.getElementById('payment-modal-total-usd');
         const paymentModalTotalBsSpan = document.getElementById('payment-modal-total-bs');
         const paymentMethodSelect = document.getElementById('payment-method');
@@ -998,6 +1068,7 @@
 
         // Other Elements and Constants
         const LOW_STOCK_THRESHOLD = 5; // Threshold for highlighting low stock products
+        const DEFAULT_PROFIT_MARGIN = 0.30; // Default 30% profit margin as a decimal
         const clearStorageButton = document.getElementById('clear-storage-button');
 
         // Variables to store current bill totals for the payment modal
@@ -1014,17 +1085,28 @@
 
         // --- Data Persistence ---
 
-        // Loads data from localStorage on application start
+        /**
+         * Loads application state from localStorage.
+         * Ensures products have a profitMargin, defaulting if missing.
+         */
         function loadData() {
           const savedData = localStorage.getItem("papeleriaData");
           if (savedData) {
             try {
-              AppState = JSON.parse(savedData);
-              // Ensure arrays exist and exchange rate is a number
-              AppState.products = Array.isArray(AppState.products) ? AppState.products : [];
-              AppState.sales = Array.isArray(AppState.sales) ? AppState.sales : [];
-              AppState.currentBill = Array.isArray(AppState.currentBill) ? AppState.currentBill : [];
-              AppState.exchangeRate = typeof AppState.exchangeRate === 'number' ? AppState.exchangeRate : 85.40;
+              const parsedData = JSON.parse(savedData);
+              AppState = {
+                products: Array.isArray(parsedData.products) ? parsedData.products : [],
+                sales: Array.isArray(parsedData.sales) ? parsedData.sales : [],
+                currentBill: Array.isArray(parsedData.currentBill) ? parsedData.currentBill : [],
+                exchangeRate: typeof parsedData.exchangeRate === 'number' ? parsedData.exchangeRate : 85.40,
+              };
+
+              // Ensure all products have a profitMargin (add default if missing)
+              AppState.products = AppState.products.map(p => ({
+                  ...p,
+                  profitMargin: (typeof p.profitMargin === 'number' && p.profitMargin >= 0) ? p.profitMargin : DEFAULT_PROFIT_MARGIN
+              }));
+
               exchangeRateInput.value = AppState.exchangeRate.toFixed(2); // Update input display
             } catch (error) {
               console.error("Error parsing data from localStorage:", error);
@@ -1036,7 +1118,9 @@
           }
         }
 
-        // Saves the current AppState to localStorage
+        /**
+         * Saves the current application state to localStorage.
+         */
         function saveData() {
           try {
             localStorage.setItem("papeleriaData", JSON.stringify(AppState));
@@ -1048,7 +1132,12 @@
 
          // --- Message Display (UI/UX Improvement) ---
 
-        // Displays a message in the message area
+        /**
+         * Displays a Bootstrap alert message in the designated message area.
+         * @param {string} message - The message text to display.
+         * @param {string} [type='success'] - The alert type (e.g., 'success', 'danger', 'warning', 'info').
+         * @param {number} [duration=5000] - Duration in milliseconds before the alert fades out (0 for persistent).
+         */
         function showMessage(message, type = 'success', duration = 5000) {
             // Create a Bootstrap alert element
             const alertElement = document.createElement('div');
@@ -1065,8 +1154,13 @@
             // Automatically remove the alert after a duration
             if (duration > 0) {
                 setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alertElement);
-                    bsAlert.close();
+                    // Check if the element still exists before trying to close
+                    if (alertElement && alertElement.parentNode === messageArea) {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+                        if (bsAlert) {
+                            bsAlert.close();
+                        }
+                    }
                 }, duration);
             }
         }
@@ -1074,15 +1168,24 @@
 
         // --- Price Calculation ---
 
-        // Calculates sale price (30% profit on cost) and converts to BS
+        /**
+         * Calculates sale prices (USD and VES) and profit (USD) based on product cost, profit margin, and exchange rate.
+         * @param {object} product - The product object containing costUSD and profitMargin.
+         * @returns {object} An object with calculated priceUSD, priceBS, and profitUSD.
+         */
         function calculatePrices(product) {
-          const costUSD = product.costUSD;
-          if (typeof costUSD !== "number" || costUSD < 0) {
+          const costUSD = typeof product.costUSD === 'number' ? product.costUSD : 0;
+          // Use product's margin if valid, otherwise use default
+          const profitMargin = (typeof product.profitMargin === 'number' && product.profitMargin >= 0)
+                               ? product.profitMargin
+                               : DEFAULT_PROFIT_MARGIN;
+
+          if (costUSD < 0) {
             console.error("Costo inválido para calcular precios:", product);
             return { priceUSD: 0, priceBS: 0, profitUSD: 0 };
           }
 
-          const salePriceUSD = costUSD * 1.3; // 30% profit margin
+          const salePriceUSD = costUSD * (1 + profitMargin);
           let salePriceBS = salePriceUSD * AppState.exchangeRate;
 
           // Round Bolivar price: up if decimal >= 0.30, down otherwise
@@ -1100,11 +1203,15 @@
 
         // --- Rendering Functions ---
 
-        // Renders the product list on the main tab (filtered) and management tab (all)
+        /**
+         * Renders the product list on the Home tab (filtered, in-stock)
+         * and the Products tab (all products).
+         * @param {string} [searchTerm=''] - The term to filter product names by.
+         */
         function renderProducts(searchTerm = '') {
           const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-          // Filter products for the Home tab (only show in-stock items)
+          // --- Render Home Tab Product List ---
           const homeFilteredProducts = AppState.products.filter(product =>
             product.stock > 0 && product.name.toLowerCase().includes(lowerCaseSearchTerm)
           );
@@ -1112,8 +1219,7 @@
           productsListTbody.innerHTML = homeFilteredProducts.length > 0
             ? homeFilteredProducts.map(product => {
                 const prices = calculatePrices(product);
-                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
-                // Add data-id attribute to the row for easy access
+                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : '';
                 return `
                   <tr class="${rowClass} clickable-row" data-id="${product.id}">
                       <td>${product.name}</td>
@@ -1130,37 +1236,38 @@
             : `<tr><td colspan="5" class="text-center text-muted">No se encontraron productos ${searchTerm ? 'con ese nombre' : ''}.</td></tr>`;
 
 
-          // Render all products for the Management tab
+          // --- Render Products Tab Management List ---
           managementListTbody.innerHTML = AppState.products.length > 0
             ? AppState.products.map(product => {
                 const prices = calculatePrices(product);
-                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''; // Highlight low stock
-                 // Add data-id attribute to the row for easy access
+                const rowClass = product.stock <= LOW_STOCK_THRESHOLD ? 'low-stock' : '';
                 return `
                   <tr class="${rowClass} clickable-row" data-id="${product.id}">
                       <td>${product.name}</td>
                       <td>${product.costUSD.toFixed(2)}$</td>
+                      <td>${(product.profitMargin * 100).toFixed(2)}%</td>
                       <td>${prices.priceUSD.toFixed(2)}$</td>
                       <td>${prices.priceBS.toFixed(0)}Bs</td>
                       <td>${product.stock}</td>
                       </tr>`;
               }).join("")
-            : `<tr><td colspan="5" class="text-center text-muted">No hay productos registrados.</td></tr>`; // Adjusted colspan
+            : `<tr><td colspan="6" class="text-center text-muted">No hay productos registrados.</td></tr>`;
         }
 
-        // Updates the display of the current bill and its total
+        /**
+         * Updates the display of the current bill items and the total amount.
+         */
         function updateBillDisplay() {
           currentBillTotalUSD = 0;
           currentBillTotalBS = 0;
 
           if (AppState.currentBill.length === 0) {
             currentBillItemsDiv.innerHTML = `<p id="empty-bill-message" class="text-muted">La factura está vacía. Agrega productos del inventario.</p>`;
-            emptyBillMessage.style.display = 'block'; // Show empty message
+            emptyBillMessage.style.display = 'block';
           } else {
-             emptyBillMessage.style.display = 'none'; // Hide empty message
+             emptyBillMessage.style.display = 'none';
              currentBillItemsDiv.innerHTML = AppState.currentBill.map(item => {
                 const product = AppState.products.find(p => p.id === item.id);
-                // Ensure product exists before calculating price (should always exist if added correctly)
                 const prices = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0 };
                 const subtotalUSD = prices.priceUSD * item.quantity;
                 const subtotalBS = prices.priceBS * item.quantity;
@@ -1184,14 +1291,18 @@
           }
 
           totalDisplaySpan.textContent = `${currentBillTotalUSD.toFixed(2)}$ | ${currentBillTotalBS.toFixed(0)}Bs`;
-          checkBillAndToggleFacturarButton(); // Update button state
+          checkBillAndToggleFacturarButton();
         }
 
-        // Renders the sales history list based on the selected filter (Replacing Table)
+        /**
+         * Renders the sales history list based on the selected filter.
+         * Also updates the sales summary totals and the top products chart (if visible).
+         * @param {string} [filterType='all'] - The filter type ('all', 'today', 'yesterday', etc.).
+         */
         function renderSales(filterType = 'all') {
             let filteredSales = [];
             const now = new Date();
-            now.setHours(0, 0, 0, 0); // Start of today
+            now.setHours(0, 0, 0, 0);
 
             switch (filterType) {
                 case 'today':
@@ -1212,8 +1323,8 @@
                     break;
                 case 'this-week':
                     const firstDayOfWeek = new Date(now);
-                    firstDayOfWeek.setDate(now.getDate() - now.getDay()); // Adjust to Sunday (or Monday if locale changes)
-                     firstDayOfWeek.setHours(0, 0, 0, 0); // Ensure start of day
+                    firstDayOfWeek.setDate(now.getDate() - now.getDay());
+                    firstDayOfWeek.setHours(0, 0, 0, 0);
                     filteredSales = AppState.sales.filter(sale => {
                         const saleDate = new Date(sale.date);
                         return saleDate >= firstDayOfWeek;
@@ -1221,7 +1332,7 @@
                     break;
                 case 'this-month':
                     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                     firstDayOfMonth.setHours(0, 0, 0, 0); // Ensure start of day
+                    firstDayOfMonth.setHours(0, 0, 0, 0);
                     filteredSales = AppState.sales.filter(sale => {
                         const saleDate = new Date(sale.date);
                         return saleDate >= firstDayOfMonth;
@@ -1229,7 +1340,7 @@
                     break;
                  case 'this-year':
                     const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-                     firstDayOfYear.setHours(0, 0, 0, 0); // Ensure start of day
+                    firstDayOfYear.setHours(0, 0, 0, 0);
                     filteredSales = AppState.sales.filter(sale => {
                         const saleDate = new Date(sale.date);
                         return saleDate >= firstDayOfYear;
@@ -1241,63 +1352,47 @@
                     break;
             }
 
-            // Calculate Sales Summary for the filtered sales
             let totalFilteredSalesUSD = 0;
             let totalFilteredSalesBS = 0;
             let totalReceivedNetUSD = 0;
             let totalReceivedNetBS = 0;
-
-            // Aggregate product quantities for the chart
             const productSalesCount = {};
+
             filteredSales.forEach(sale => {
                 totalFilteredSalesUSD += sale.totalUSD;
                 totalFilteredSalesBS += sale.totalBS;
-
                 const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                 const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
                 totalReceivedNetUSD += actualReceivedUSD;
                 totalReceivedNetBS += actualReceivedBS;
-
                 sale.items.forEach(item => {
-                    if (!productSalesCount[item.name]) {
-                        productSalesCount[item.name] = 0;
-                    }
-                    productSalesCount[item.name] += item.quantity;
+                    productSalesCount[item.name] = (productSalesCount[item.name] || 0) + item.quantity;
                 });
             });
 
-            // Sort products by quantity sold (descending) and get top N (e.g., top 10)
             const sortedProducts = Object.entries(productSalesCount)
                 .sort(([, quantityA], [, quantityB]) => quantityB - quantityA)
-                .slice(0, 10); // Get top 10 products
-
+                .slice(0, 10);
             const topProductNames = sortedProducts.map(([name]) => name);
             const topProductQuantities = sortedProducts.map(([, quantity]) => quantity);
 
-
-            // Update summary display
             totalSalesUsdSpan.textContent = `${totalFilteredSalesUSD.toFixed(2)}$`;
             totalSalesBsSpan.textContent = `${totalFilteredSalesBS.toFixed(0)}Bs`;
             totalReceivedUsdSpan.textContent = `${totalReceivedNetUSD.toFixed(2)}$`;
             totalReceivedBsSpan.textContent = `${totalReceivedNetBS.toFixed(0)}Bs`;
 
-            // Update the chart - Now showing top products
-            // Check if the floating chart panel is currently visible before updating the chart
             if (chartFloatingPanel.classList.contains('show')) {
                  updateTopProductsChart(topProductNames, topProductQuantities);
             }
 
-
-            // Render the sales history list (Replacing Table)
             if (filteredSales.length === 0) {
              salesHistoryListDiv.innerHTML = `<p class="text-center text-muted">No hay ventas registradas para este período.</p>`;
             } else {
-             salesHistoryListDiv.innerHTML = filteredSales.sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending by date
+             salesHistoryListDiv.innerHTML = filteredSales
+               .sort((a, b) => new Date(b.date) - new Date(a.date))
                .map(sale => {
-                    // Calculate net received for this specific row display
                     const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                     const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
-
                     return `
                         <div class="sale-item-card" data-date="${sale.date}"> <div class="sale-item-header">
                                 <span class="sale-date">${new Date(sale.date).toLocaleDateString()} ${new Date(sale.date).toLocaleTimeString()}</span>
@@ -1316,53 +1411,41 @@
             }
         }
 
-        // Initializes or updates the Chart.js bar chart for top selling products
+        /**
+         * Initializes or updates the Chart.js bar chart for top selling products.
+         * @param {string[]} productNames - Array of product names for the X-axis.
+         * @param {number[]} quantities - Array of corresponding quantities sold for the Y-axis.
+         */
         function updateTopProductsChart(productNames, quantities) {
             const ctx = document.getElementById('top-products-chart').getContext('2d');
-
             const data = {
-                labels: productNames, // Product names on the X-axis
+                labels: productNames,
                 datasets: [{
                     label: 'Cantidad Vendida',
                     data: quantities,
-                    backgroundColor: [ /* More colors for better visual separation */
-                        'rgba(37, 99, 235, 0.8)', /* primary-color */
-                        'rgba(59, 130, 246, 0.8)', /* secondary-color */
-                        'rgba(16, 185, 129, 0.8)', /* emerald-500 */
-                        'rgba(245, 158, 11, 0.8)', /* amber-500 */
-                        'rgba(239, 68, 68, 0.8)',  /* red-500 */
-                        'rgba(147, 51, 234, 0.8)', /* violet-500 */
-                        'rgba(236, 72, 153, 0.8)', /* pink-500 */
-                        'rgba(34, 197, 94, 0.8)',  /* green-500 */
-                        'rgba(249, 115, 22, 0.8)',  /* orange-500 */
-                        'rgba(107, 114, 128, 0.8)' /* slate-500 */
+                    backgroundColor: [
+                        'rgba(37, 99, 235, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(147, 51, 234, 0.8)',
+                        'rgba(236, 72, 153, 0.8)', 'rgba(34, 197, 94, 0.8)', 'rgba(249, 115, 22, 0.8)',
+                        'rgba(107, 114, 128, 0.8)'
                     ],
-                    borderColor: [ /* Matching border colors */
-                        'rgba(37, 99, 235, 1)',
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(16, 185, 129, 1)',
-                        'rgba(245, 158, 11, 1)',
-                        'rgba(239, 68, 68, 1)',
-                        'rgba(147, 51, 234, 1)',
-                        'rgba(236, 72, 153, 1)',
-                        'rgba(34, 197, 94, 1)',
-                        'rgba(249, 115, 22, 1)',
+                    borderColor: [
+                        'rgba(37, 99, 235, 1)', 'rgba(59, 130, 246, 1)', 'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)', 'rgba(239, 68, 68, 1)', 'rgba(147, 51, 234, 1)',
+                        'rgba(236, 72, 153, 1)', 'rgba(34, 197, 94, 1)', 'rgba(249, 115, 22, 1)',
                         'rgba(107, 114, 128, 1)'
                     ],
                     borderWidth: 1
                 }]
             };
-
             const options = {
                  responsive: true,
-                 maintainAspectRatio: false, // Allow container to control size
+                 maintainAspectRatio: false,
                  plugins: {
-                    legend: {
-                        display: false, // Hide legend for a single dataset bar chart
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: `Productos Más Vendidos (${salesFilterSelect.options[salesFilterSelect.selectedIndex].text})` // Dynamic title based on filter
+                        text: `Productos Más Vendidos (${salesFilterSelect.options[salesFilterSelect.selectedIndex].text})`
                     },
                      tooltip: {
                         callbacks: {
@@ -1375,84 +1458,141 @@
                     }
                 },
                  scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Producto'
-                        }
-                    },
+                    x: { title: { display: true, text: 'Producto' } },
                     y: {
-                        title: {
-                            display: true,
-                            text: 'Cantidad Vendida'
-                        },
+                        title: { display: true, text: 'Cantidad Vendida' },
                          ticks: {
                              beginAtZero: true,
                               callback: function(value) {
-                                 if (Number.isInteger(value)) {
-                                     return value;
-                                 }
-                                 return null; // Only show integer ticks
+                                 if (Number.isInteger(value)) return value;
+                                 return null;
                              },
-                             stepSize: 1 // Ensure steps are integers
+                             stepSize: 1
                          }
                     }
                 }
             };
 
-
             if (topProductsChart) {
-                topProductsChart.destroy(); // Destroy existing chart before creating a new one
+                topProductsChart.destroy();
+                topProductsChart = null;
             }
-
-             // Only create chart if there is data
             if (productNames.length > 0) {
                 topProductsChart = new Chart(ctx, {
-                    type: 'bar', // Use bar chart for top products
+                    type: 'bar',
                     data: data,
                     options: options
                 });
             }
         }
 
+        // --- Product Pricing Calculation Helpers ---
+
+        /**
+         * Calculates and updates the VES and USD sale price fields based on cost and margin inputs.
+         * @param {HTMLInputElement} costInput - Input element for cost in USD.
+         * @param {HTMLInputElement} marginInput - Input element for profit margin percentage.
+         * @param {HTMLInputElement} salePriceBsInput - Input element for sale price in VES (will be updated).
+         * @param {HTMLInputElement} salePriceUsdInput - Input element for sale price in USD (will be updated, readonly).
+         */
+        function updatePricesFromMargin(costInput, marginInput, salePriceBsInput, salePriceUsdInput) {
+            const costUSD = parseFloat(costInput.value) || 0;
+            const marginPercent = parseFloat(marginInput.value) || 0;
+            const profitMargin = marginPercent / 100;
+            if (costUSD < 0 || profitMargin < 0) {
+                salePriceBsInput.value = '';
+                salePriceUsdInput.value = '';
+                return;
+            }
+            const tempProduct = { costUSD: costUSD, profitMargin: profitMargin };
+            const prices = calculatePrices(tempProduct);
+            salePriceBsInput.value = prices.priceBS.toFixed(0);
+            salePriceUsdInput.value = prices.priceUSD.toFixed(2) + '$';
+        }
+
+        /**
+         * Calculates and updates the margin and USD sale price fields based on cost and VES sale price inputs.
+         * @param {HTMLInputElement} costInput - Input element for cost in USD.
+         * @param {HTMLInputElement} marginInput - Input element for profit margin percentage (will be updated).
+         * @param {HTMLInputElement} salePriceBsInput - Input element for sale price in VES.
+         * @param {HTMLInputElement} salePriceUsdInput - Input element for sale price in USD (will be updated, readonly).
+         */
+        function updateMarginFromVesPrice(costInput, marginInput, salePriceBsInput, salePriceUsdInput) {
+            const costUSD = parseFloat(costInput.value) || 0;
+            const salePriceBS = parseInt(salePriceBsInput.value) || 0;
+            const exchangeRate = AppState.exchangeRate;
+            if (costUSD < 0 || salePriceBS < 0 || exchangeRate <= 0) {
+                marginInput.value = '';
+                salePriceUsdInput.value = '';
+                return;
+            }
+            const calculatedSalePriceUSD = salePriceBS / exchangeRate;
+            if (costUSD > 0) {
+                const calculatedMargin = (calculatedSalePriceUSD / costUSD) - 1;
+                marginInput.value = (calculatedMargin * 100).toFixed(2);
+            } else {
+                marginInput.value = '';
+            }
+            salePriceUsdInput.value = calculatedSalePriceUSD.toFixed(2) + '$';
+        }
 
         // --- Product Actions ---
 
-        // Handles the submission of the new product form
+        // Add event listeners for interactive price calculation in the NEW product form
+        productCostInput.addEventListener('input', () => updatePricesFromMargin(productCostInput, productMarginInput, productSalePriceBsInput, productSalePriceUsdInput));
+        productMarginInput.addEventListener('input', () => updatePricesFromMargin(productCostInput, productMarginInput, productSalePriceBsInput, productSalePriceUsdInput));
+        productSalePriceBsInput.addEventListener('input', () => updateMarginFromVesPrice(productCostInput, productMarginInput, productSalePriceBsInput, productSalePriceUsdInput));
+
+        // Add event listeners for interactive price calculation in the EDIT product form
+        editProductCostInput.addEventListener('input', () => updatePricesFromMargin(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput));
+        editProductMarginInput.addEventListener('input', () => updatePricesFromMargin(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput));
+        editProductSalePriceBsInput.addEventListener('input', () => updateMarginFromVesPrice(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput));
+
+
+        /**
+         * Handles the submission of the new product form.
+         * Validates input, calculates profit margin, creates the product object,
+         * adds it to the state, saves, re-renders, and resets the form.
+         * @param {Event} e - The form submission event.
+         */
         newProductForm.addEventListener("submit", (e) => {
           e.preventDefault();
-          const name = document.getElementById("product-name").value.trim();
-          const costUSD = parseFloat(document.getElementById("product-price").value);
-          const stock = parseInt(document.getElementById("product-stock").value);
-
-          // Validation
-          if (!name || isNaN(costUSD) || isNaN(stock) || costUSD < 0 || stock < 0) {
-              showMessage("Por favor, ingresa datos válidos para el producto (Nombre no vacío, Costo y Stock >= 0).", 'warning');
+          const name = productNameInput.value.trim();
+          const costUSD = parseFloat(productCostInput.value);
+          const marginPercent = parseFloat(productMarginInput.value);
+          const stock = parseInt(productStockInput.value);
+          if (!name || isNaN(costUSD) || isNaN(marginPercent) || isNaN(stock) || costUSD < 0 || marginPercent < 0 || stock < 0) {
+              showMessage("Por favor, ingresa datos válidos para el producto (Nombre no vacío, Costo, Margen y Stock >= 0).", 'warning');
               return;
           }
-          // Check for duplicate product name (case-insensitive)
            if (AppState.products.some(p => p.name.toLowerCase() === name.toLowerCase())) {
                showMessage(`Ya existe un producto con el nombre "${name}".`, 'warning');
                return;
            }
-
-
+          const profitMargin = marginPercent / 100;
           const newProduct = {
-            id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, // More robust unique ID
+            id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
             name: name,
             costUSD: costUSD,
             stock: stock,
+            profitMargin: profitMargin,
           };
-
           AppState.products.push(newProduct);
-          AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Keep products sorted alphabetically
+          AppState.products.sort((a, b) => a.name.localeCompare(b.name));
           saveData();
           renderProducts(productSearchInput.value);
-          e.target.reset(); // Clear the form
+          e.target.reset();
+          productSalePriceBsInput.value = '';
+          productSalePriceUsdInput.value = '';
+          productMarginInput.value = (DEFAULT_PROFIT_MARGIN * 100).toFixed(2);
           showMessage("Producto guardado con éxito!", 'success');
         });
 
-        // Deletes a product after confirmation (called from modal or directly)
+        /**
+         * Deletes a product after confirmation.
+         * Checks if the product is in the current bill or sales history before deleting.
+         * @param {string} id - The ID of the product to delete.
+         */
         window.deleteProduct = function (id) {
           const productIndex = AppState.products.findIndex(p => p.id === id);
           if (productIndex === -1) {
@@ -1461,33 +1601,31 @@
               return;
           }
           const productName = AppState.products[productIndex].name;
-
-          // Check if product is in the current bill
           if (AppState.currentBill.some(item => item.id === id)) {
                showMessage(`No se puede eliminar "${productName}" porque está en la factura actual. Quítalo de la factura primero.`, 'warning');
               return;
           }
-
-          // Check if product exists in any sale
            const isInSales = AppState.sales.some(sale => sale.items.some(item => item.id === id));
            if (isInSales) {
                showMessage(`No se puede eliminar "${productName}" porque existe en el historial de ventas. Considera marcarlo como inactivo o con stock 0 en su lugar.`, 'warning');
                return;
            }
-
-
           if (confirm(`¿Estás seguro de que deseas eliminar el producto "${productName}"? Esta acción no se puede deshacer.`)) {
-              AppState.products.splice(productIndex, 1); // Remove product from array
+              AppState.products.splice(productIndex, 1);
               saveData();
-              renderProducts(productSearchInput.value); // Re-render product lists
-              updateBillDisplay(); // Update bill display (in case it was in bill, though check above prevents this)
-              renderSales(salesFilterSelect.value); // Re-render sales with current filter
+              renderProducts(productSearchInput.value);
+              updateBillDisplay();
+              renderSales(salesFilterSelect.value);
               showMessage(`Producto "${productName}" eliminado.`, 'success');
-              editProductModal.hide(); // Hide the modal after deletion
+              editProductModal.hide();
           }
         };
 
-        // Opens the edit product modal and populates it (triggered by row click)
+        /**
+         * Opens the edit product modal and populates it with the selected product's data.
+         * Calculates initial sale prices based on the stored margin.
+         * @param {string} id - The ID of the product to edit.
+         */
         window.editProduct = function(id) {
             const productToEdit = AppState.products.find(p => p.id === id);
             if (!productToEdit) {
@@ -1495,57 +1633,51 @@
                 showMessage("Error: Producto no encontrado para editar.", 'danger');
                 return;
             }
-
-            // Populate the modal form
             editProductIdInput.value = productToEdit.id;
             editProductNameInput.value = productToEdit.name;
-            editProductPriceInput.value = productToEdit.costUSD.toFixed(2); // Populate with cost, formatted
+            editProductCostInput.value = productToEdit.costUSD.toFixed(2);
+            editProductMarginInput.value = (productToEdit.profitMargin * 100).toFixed(2);
             editProductStockInput.value = productToEdit.stock;
-
-            // Store the product ID on the delete button for easy access
+            updatePricesFromMargin(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput);
             deleteProductFromModalButton.dataset.productId = productToEdit.id;
-
-            editProductModal.show(); // Show the modal
+            editProductModal.show();
         };
 
-        // Handles the submission of the edit product form
+        /**
+         * Handles the submission of the edit product form.
+         * Validates input, updates the product object in the state, saves,
+         * re-renders relevant UI parts, and hides the modal.
+         * @param {Event} e - The form submission event.
+         */
         editProductForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
             const productId = editProductIdInput.value;
             const newName = editProductNameInput.value.trim();
-            const newCostUSD = parseFloat(editProductPriceInput.value);
+            const newCostUSD = parseFloat(editProductCostInput.value);
+            const newMarginPercent = parseFloat(editProductMarginInput.value);
             const newStock = parseInt(editProductStockInput.value);
-
-            // Validation
-            if (!newName || isNaN(newCostUSD) || isNaN(newStock) || newCostUSD < 0 || newStock < 0) {
-                showMessage("Por favor, ingresa datos válidos para editar el producto (Nombre no vacío, Costo y Stock >= 0).", 'warning');
+            if (!newName || isNaN(newCostUSD) || isNaN(newMarginPercent) || isNaN(newStock) || newCostUSD < 0 || newMarginPercent < 0 || newStock < 0) {
+                showMessage("Por favor, ingresa datos válidos para editar el producto (Nombre no vacío, Costo, Margen y Stock >= 0).", 'warning');
                 return;
             }
-
-            // Check for duplicate name (excluding the current product being edited)
             if (AppState.products.some(p => p.id !== productId && p.name.toLowerCase() === newName.toLowerCase())) {
                 showMessage(`Ya existe otro producto con el nombre "${newName}".`, 'warning');
                 return;
             }
-
-
-            // Find the product index
+            const newProfitMargin = newMarginPercent / 100;
             const productIndex = AppState.products.findIndex(p => p.id === productId);
             if (productIndex !== -1) {
-                // Update product data
                 AppState.products[productIndex].name = newName;
                 AppState.products[productIndex].costUSD = newCostUSD;
                 AppState.products[productIndex].stock = newStock;
-
-                AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Re-sort after name change
-
+                AppState.products[productIndex].profitMargin = newProfitMargin;
+                AppState.products.sort((a, b) => a.name.localeCompare(b.name));
                 saveData();
-                renderProducts(productSearchInput.value); // Re-render product lists
-                updateBillDisplay(); // Update bill if the edited product is in it
-                renderSales(salesFilterSelect.value); // Re-render sales with current filter
+                renderProducts(productSearchInput.value);
+                updateBillDisplay();
+                renderSales(salesFilterSelect.value);
                 showMessage("Producto actualizado con éxito!", 'success');
-                editProductModal.hide(); // Hide the modal
+                editProductModal.hide();
             } else {
                 console.error("Error al encontrar el producto para actualizar:", productId);
                 showMessage("Error al actualizar el producto.", 'danger');
@@ -1554,142 +1686,140 @@
 
         // Event listener for the delete button inside the edit product modal
         deleteProductFromModalButton.addEventListener('click', () => {
-            const productId = deleteProductFromModalButton.dataset.productId; // Get ID from data attribute
+            const productId = deleteProductFromModalButton.dataset.productId;
             if (productId) {
-                deleteProduct(productId); // Call the delete function
+                deleteProduct(productId);
             }
         });
 
 
         // --- Bill Actions ---
 
-        // Adds a product to the current bill (exposed globally for onclick)
+        /**
+         * Adds a product to the current bill or increments its quantity if already present.
+         * Decreases the product's stock.
+         * @param {string} id - The ID of the product to add.
+         */
         window.addToBill = function (id) {
           const product = AppState.products.find((p) => p.id === id);
-
           if (!product) {
             console.error("Producto no encontrado para agregar a la factura:", id);
             showMessage("Error: Producto no encontrado para agregar a la factura.", 'danger');
             return;
           }
-
           if (product.stock <= 0) {
             showMessage(`¡No hay más ${product.name} en stock!`, 'warning');
             return;
           }
-
           const existingItem = AppState.currentBill.find((item) => item.id === id);
-
           if (existingItem) {
-            existingItem.quantity++; // Increment quantity if already in bill
+            existingItem.quantity++;
           } else {
-            // Add new item to the bill
             AppState.currentBill.push({
               id: product.id,
               name: product.name,
-              // costUSD: product.costUSD, // Store cost if needed for historical reports, but calculate price dynamically
               quantity: 1,
             });
-             AppState.currentBill.sort((a, b) => a.name.localeCompare(b.name)); // Keep bill sorted
+             AppState.currentBill.sort((a, b) => a.name.localeCompare(b.name));
           }
-
-          product.stock--; // Decrease stock in the main product list
+          product.stock--;
           updateBillDisplay();
-          renderProducts(productSearchInput.value); // Update stock display in product lists
+          renderProducts(productSearchInput.value);
           saveData();
         };
 
-        // Removes an item completely from the current bill (exposed globally for onclick)
+        /**
+         * Removes an item completely from the current bill.
+         * Returns the item's quantity back to the product's stock.
+         * @param {string} id - The ID of the bill item to remove.
+         */
         window.removeFromBill = function(id) {
             const itemIndex = AppState.currentBill.findIndex(item => item.id === id);
             if (itemIndex !== -1) {
-                const removedItem = AppState.currentBill.splice(itemIndex, 1)[0]; // Remove and get the item
+                const removedItem = AppState.currentBill.splice(itemIndex, 1)[0];
                 const product = AppState.products.find(p => p.id === removedItem.id);
                 if (product) {
-                    product.stock += removedItem.quantity; // Return the full quantity to stock
+                    product.stock += removedItem.quantity;
                 }
                 updateBillDisplay();
-                renderProducts(productSearchInput.value); // Update stock display
+                renderProducts(productSearchInput.value);
                 saveData();
             }
         };
 
-        // Adjusts the quantity of an item in the bill (exposed globally for onclick)
-        window.adjustBillQuantity = function(id, delta) { // delta is +1 or -1
+        /**
+         * Adjusts the quantity of an item in the bill by a given delta (+1 or -1).
+         * Handles stock checks and removes the item if quantity reaches zero.
+         * @param {string} id - The ID of the bill item to adjust.
+         * @param {number} delta - The change in quantity (+1 to increase, -1 to decrease).
+         */
+        window.adjustBillQuantity = function(id, delta) {
             const item = AppState.currentBill.find(item => item.id === id);
             const product = AppState.products.find(p => p.id === id);
-
             if (!item || !product) {
                 console.error("Item o producto no encontrado para ajustar cantidad:", id);
                 showMessage("Error: Item o producto no encontrado.", 'danger');
                 return;
             }
-
             const newQuantity = item.quantity + delta;
-
-            if (delta > 0) { // Increasing quantity
-                if (product.stock < delta) { // Use delta here, not 1, in case delta changes later
+            if (delta > 0) {
+                if (product.stock < delta) {
                     showMessage(`No hay suficiente stock de "${product.name}" para añadir más.`, 'warning');
                     return;
                 }
                 item.quantity = newQuantity;
                 product.stock -= delta;
-            } else if (delta < 0) { // Decreasing quantity
+            } else if (delta < 0) {
                 if (newQuantity <= 0) {
-                    // If quantity reaches zero or less, remove the item completely
-                    removeFromBill(id); // This handles returning stock
-                    return; // Exit early as removeFromBill updates display and saves
+                    removeFromBill(id);
+                    return;
                 } else {
                     item.quantity = newQuantity;
-                    product.stock -= delta; // delta is negative, so this adds stock back
+                    product.stock -= delta;
                 }
             }
-
             updateBillDisplay();
-            renderProducts(productSearchInput.value); // Update stock display
+            renderProducts(productSearchInput.value);
             saveData();
         };
 
         // --- Payment Modal Logic ---
 
-        // Opens the payment modal when "Procesar Factura" is clicked
+        /**
+         * Opens the payment modal, populates totals, and resets payment fields.
+         */
         processBillButton.addEventListener("click", () => {
              if (AppState.currentBill.length === 0) {
                  showMessage("La factura está vacía. Agrega productos antes de procesar.", 'warning');
                  return;
              }
-
-             // Update modal total display using current bill totals
              paymentModalTotalUsdSpan.textContent = `$${currentBillTotalUSD.toFixed(2)}`;
              paymentModalTotalBsSpan.textContent = ` | ${currentBillTotalBS.toFixed(0)}Bs`;
-
-             // Reset modal state
-             paymentMethodSelect.value = 'usd'; // Default to USD
+             paymentMethodSelect.value = 'usd';
              amountReceivedUsdInput.value = '';
              amountReceivedVesInput.value = '';
              amountReceivedMixedUsdInput.value = '';
              amountReceivedMixedVesInput.value = '';
              paymentStatusP.textContent = '';
              paymentChangeP.textContent = '';
-             usdChangeOptionsDiv.classList.add('hidden'); // Hide change options
-             usdChangeUsdRadio.checked = true; // Default change currency to USD
-             resetPaymentErrors(); // Clear validation errors
-             confirmPaymentButton.disabled = true; // Disable confirm button initially
-
-             togglePaymentSections('usd'); // Show the default USD section
-
-             paymentModal.show(); // Show the modal
+             usdChangeOptionsDiv.classList.add('hidden');
+             usdChangeUsdRadio.checked = true;
+             resetPaymentErrors();
+             confirmPaymentButton.disabled = true;
+             togglePaymentSections('usd');
+             paymentModal.show();
         });
 
-        // Toggles visibility of payment input sections based on selected method
+        /**
+         * Toggles the visibility of payment input sections (USD, VES, Mixed)
+         * based on the selected payment method.
+         * @param {string} method - The selected payment method ('usd', 'ves', 'mixed').
+         */
         function togglePaymentSections(method) {
-            // Hide all sections first
             usdPaymentSection.classList.add('hidden');
             vesPaymentSection.classList.add('hidden');
             mixedPaymentSection.classList.add('hidden');
-            usdChangeOptionsDiv.classList.add('hidden'); // Always hide change options when switching
-
-            // Clear inputs and results when switching
+            usdChangeOptionsDiv.classList.add('hidden');
             amountReceivedUsdInput.value = '';
             amountReceivedVesInput.value = '';
             amountReceivedMixedUsdInput.value = '';
@@ -1697,9 +1827,7 @@
             paymentStatusP.textContent = '';
             paymentChangeP.textContent = '';
             resetPaymentErrors();
-            confirmPaymentButton.disabled = true; // Disable confirm button
-
-            // Show the selected section
+            confirmPaymentButton.disabled = true;
             if (method === 'usd') {
                 usdPaymentSection.classList.remove('hidden');
             } else if (method === 'ves') {
@@ -1709,19 +1837,24 @@
             }
         }
 
-        // Updates the visible payment section when the dropdown changes
+        // Event listener for payment method dropdown change
         paymentMethodSelect.addEventListener('change', (e) => {
             togglePaymentSections(e.target.value);
         });
 
-        // --- Input Validation and Calculation ---
+        // --- Payment Input Validation and Calculation ---
 
-        // Validates that input is a non-negative integer (allows empty string)
+        /**
+         * Validates that an input field contains a non-negative integer (or is empty).
+         * Updates input styling and displays an error message if invalid.
+         * @param {HTMLInputElement} inputElement - The input element to validate.
+         * @param {HTMLElement} errorElement - The element to display the error message in.
+         * @param {string} message - The error message to display if invalid.
+         * @returns {boolean} True if the input is valid, false otherwise.
+         */
         function validateIntegerInput(inputElement, errorElement, message) {
             const value = inputElement.value;
-            // Regex: Allows empty string OR one or more digits. No decimals, no negative sign.
             const isValid = value === '' || /^\d+$/.test(value);
-
             if (!isValid) {
                 errorElement.textContent = message;
                 inputElement.classList.add('is-invalid');
@@ -1733,7 +1866,9 @@
             }
         }
 
-        // Clears all validation error messages and styles
+        /**
+         * Clears all validation error messages and removes 'is-invalid' class from payment inputs.
+         */
         function resetPaymentErrors() {
             amountReceivedUsdError.textContent = '';
             amountReceivedVesError.textContent = '';
@@ -1745,13 +1880,12 @@
             amountReceivedMixedVesInput.classList.remove('is-invalid');
         }
 
-        // Add input event listeners to trigger validation and recalculation
+        // Add input event listeners to trigger validation and recalculation for payment fields
         amountReceivedUsdInput.addEventListener('input', () => {
             validateIntegerInput(amountReceivedUsdInput, amountReceivedUsdError, "Solo números enteros positivos.");
             calculatePayment();
         });
         amountReceivedVesInput.addEventListener('input', () => {
-             // Remove decimals immediately for VES
              amountReceivedVesInput.value = amountReceivedVesInput.value.replace(/\./g, '');
             validateIntegerInput(amountReceivedVesInput, amountReceivedVesError, "Solo números enteros positivos.");
             calculatePayment();
@@ -1761,158 +1895,146 @@
             calculatePayment();
         });
         amountReceivedMixedVesInput.addEventListener('input', () => {
-             // Remove decimals immediately for VES
              amountReceivedMixedVesInput.value = amountReceivedMixedVesInput.value.replace(/\./g, '');
             validateIntegerInput(amountReceivedMixedVesInput, amountReceivedMixedVesError, "Solo números enteros positivos.");
             calculatePayment();
         });
 
-        // Recalculate payment if change currency option changes
+        // Recalculate payment if the USD change currency option changes
         usdChangeUsdRadio.addEventListener('change', calculatePayment);
         usdChangeVesRadio.addEventListener('change', calculatePayment);
 
-        // Calculates payment status (faltante/vuelto) based on inputs
+        /**
+         * Calculates the payment status (amount due or change) based on the selected
+         * payment method and amounts entered. Updates the payment status display
+         * and enables/disables the confirm payment button.
+         */
         function calculatePayment() {
             const method = paymentMethodSelect.value;
             const exchangeRate = AppState.exchangeRate;
             let receivedUSD_val = 0;
             let receivedVES_val = 0;
-            let isValid = true; // Assume valid initially
-            let isPaymentSufficient = false; // Track if payment covers the total
+            let isValid = true;
+            let isPaymentSufficient = false;
+            let changeGivenUSD = 0;
+            let changeGivenBS = 0;
 
-            // Clear previous results and hide change options
             paymentStatusP.textContent = '';
             paymentChangeP.textContent = '';
             usdChangeOptionsDiv.classList.add('hidden');
 
-            // --- Get received amounts, validate, and calculate status ---
             if (method === 'usd') {
                 isValid = validateIntegerInput(amountReceivedUsdInput, amountReceivedUsdError, "Solo números enteros positivos.");
                 receivedUSD_val = parseInt(amountReceivedUsdInput.value) || 0;
-
                 if (isValid && receivedUSD_val >= 0) {
                     const differenceUSD = receivedUSD_val - currentBillTotalUSD;
-                    if (differenceUSD < -0.001) { // Faltante
+                    if (differenceUSD < -0.001) {
                         paymentStatusP.textContent = `Falta: ${Math.abs(differenceUSD).toFixed(2)}$`;
                     } else {
-                        isPaymentSufficient = true; // Payment is sufficient
-                        if (differenceUSD > 0.001) { // Vuelto
+                        isPaymentSufficient = true;
+                        if (differenceUSD > 0.001) {
                            paymentStatusP.textContent = 'Pago completo.';
-                           usdChangeOptionsDiv.classList.remove('hidden'); // Show change options
+                           usdChangeOptionsDiv.classList.remove('hidden');
                            const changeCurrency = document.querySelector('input[name="usd-change-currency"]:checked').value;
                            if (changeCurrency === 'usd') {
-                               changeGivenUSD = parseFloat(differenceUSD.toFixed(2)); // Store change in USD
+                               changeGivenUSD = parseFloat(differenceUSD.toFixed(2));
                                paymentChangeP.textContent = `Vuelto: ${changeGivenUSD.toFixed(2)}$`;
                            } else {
-                               changeGivenBS = Math.round(differenceUSD * exchangeRate); // Store change in VES
+                               changeGivenBS = Math.round(differenceUSD * exchangeRate);
                                paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`;
                            }
-                        } else { // Pago exacto
+                        } else {
                             paymentStatusP.textContent = 'Pago exacto.';
                         }
                     }
                 }
-
             } else if (method === 'ves') {
                 isValid = validateIntegerInput(amountReceivedVesInput, amountReceivedVesError, "Solo números enteros positivos.");
                 receivedVES_val = parseInt(amountReceivedVesInput.value) || 0;
-
                 if (isValid && receivedVES_val >= 0) {
-                    const differenceVES = receivedVES_val - currentBillTotalBS; // Direct comparison in VES
-
-                    if (differenceVES < 0) { // Faltante
+                    const differenceVES = receivedVES_val - currentBillTotalBS;
+                    if (differenceVES < 0) {
                         paymentStatusP.textContent = `Falta: ${Math.abs(differenceVES).toFixed(0)}Bs`;
                     } else {
-                        isPaymentSufficient = true; // Payment is sufficient
-                        if (differenceVES > 0) { // Vuelto
+                        isPaymentSufficient = true;
+                        if (differenceVES > 0) {
                            paymentStatusP.textContent = 'Pago completo.';
-                           changeGivenBS = differenceVES; // Change is directly the positive difference in VES
-                           paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`; // Change is always in VES
-                        } else { // Pago exacto
+                           changeGivenBS = differenceVES;
+                           paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`;
+                        } else {
                             paymentStatusP.textContent = 'Pago exacto.';
                         }
                     }
                 }
-
             } else if (method === 'mixed') {
                 const usdValid = validateIntegerInput(amountReceivedMixedUsdInput, amountReceivedMixedUsdError, "Solo números enteros positivos.");
                 const vesValid = validateIntegerInput(amountReceivedMixedVesInput, amountReceivedMixedVesError, "Solo números enteros positivos.");
-                isValid = usdValid && vesValid; // Both must be valid
-
+                isValid = usdValid && vesValid;
                 receivedUSD_val = parseInt(amountReceivedMixedUsdInput.value) || 0;
                 receivedVES_val = parseInt(amountReceivedMixedVesInput.value) || 0;
-
-                if (isValid && (receivedUSD_val >= 0 || receivedVES_val >= 0)) { // Check non-negative amounts
+                if (isValid && (receivedUSD_val >= 0 || receivedVES_val >= 0)) {
                     const totalReceivedEquivalentUSD = receivedUSD_val + (receivedVES_val / exchangeRate);
                     const differenceUSD = totalReceivedEquivalentUSD - currentBillTotalUSD;
-
-                    if (differenceUSD < -0.0099) { // Faltante
-                        const faltanteUSD =  Math.abs(differenceUSD);
+                    if (differenceUSD < -0.0099) {
+                        const faltanteUSD = Math.abs(differenceUSD);
                         const faltanteVES = parseInt(Math.round(faltanteUSD * exchangeRate));
                         paymentStatusP.textContent = `Falta: ${faltanteUSD.toFixed(2)}$ (${faltanteVES.toFixed(0)}Bs)`;
                     } else {
-                        isPaymentSufficient = true; // Payment is sufficient
-                        if (differenceUSD > 0.001) { // Vuelto
+                        isPaymentSufficient = true;
+                        if (differenceUSD > 0.001) {
                             paymentStatusP.textContent = 'Pago completo.';
-                            // Default to giving change in VES for mixed payments
                             changeGivenBS = Math.round(differenceUSD * exchangeRate);
                             paymentChangeP.textContent = `Vuelto: ${changeGivenBS.toFixed(0)}Bs`;
-                        } else { // Pago exacto
+                        } else {
                             paymentStatusP.textContent = 'Pago exacto.';
                         }
                     }
                 }
             }
-
-            // --- Enable/Disable Confirm Button ---
-            // Enable only if input is valid AND payment is sufficient AND at least one amount is received
             const anyAmountReceived = receivedUSD_val > 0 || receivedVES_val > 0;
             confirmPaymentButton.disabled = !isValid || !isPaymentSufficient || !anyAmountReceived;
-
         }
 
 
-        // Handles the confirmation of the payment
+        /**
+         * Handles the confirmation of the payment.
+         * Creates a sale record with all details (items, prices, payment, change),
+         * saves the state, updates the UI, and hides the modal.
+         */
         confirmPaymentButton.addEventListener('click', () => {
             const method = paymentMethodSelect.value;
             let receivedUSD_customer = 0;
             let receivedBS_customer = 0;
             let changeGivenUSD = 0;
             let changeGivenBS = 0;
-
-            // --- Determine final received amounts and calculate change based on method ---
              if (method === 'usd') {
                 receivedUSD_customer = parseInt(amountReceivedUsdInput.value) || 0;
                 const difference_usd = receivedUSD_customer - currentBillTotalUSD;
-                if (difference_usd > 0.001) { // If change is due
+                if (difference_usd > 0.001) {
                     const changeCurrency = document.querySelector('input[name="usd-change-currency"]:checked').value;
                     if (changeCurrency === 'usd') {
-                        changeGivenUSD = parseFloat(difference_usd.toFixed(2)); // Keep decimals for USD change
+                        changeGivenUSD = parseFloat(difference_usd.toFixed(2));
                     } else {
                         changeGivenBS = Math.round(difference_usd * AppState.exchangeRate);
                     }
                 }
             } else if (method === 'ves') {
                 receivedBS_customer = parseInt(amountReceivedVesInput.value) || 0;
-                const difference_ves = receivedBS_customer - currentBillTotalBS; // Direct difference in VES
-                 if (difference_ves > 0) { // If change is due
-                    changeGivenBS = difference_ves; // Change is directly the positive difference in VES
+                const difference_ves = receivedBS_customer - currentBillTotalBS;
+                 if (difference_ves > 0) {
+                    changeGivenBS = difference_ves;
                  }
             } else if (method === 'mixed') {
                 receivedUSD_customer = parseInt(amountReceivedMixedUsdInput.value) || 0;
                 receivedBS_customer = parseInt(amountReceivedMixedVesInput.value) || 0;
                 const totalReceivedEquivalentUSD = receivedUSD_customer + (receivedBS_customer / AppState.exchangeRate);
                 const difference_usd = totalReceivedEquivalentUSD - currentBillTotalUSD;
-                 if (difference_usd > 0.001) { // If change is due
-                     // Default to giving change in VES for mixed payments
+                 if (difference_usd > 0.001) {
                     changeGivenBS = Math.round(difference_usd * AppState.exchangeRate);
                  }
             }
-
-
-             // --- Create and store the sale record ---
              const sale = {
-                 date: new Date().toISOString(), // Store date as ISO string for consistency
+                 date: new Date().toISOString(),
                  items: AppState.currentBill.map(item => {
                      const product = AppState.products.find(p => p.id === item.id);
                      const pricesAtSale = product ? calculatePrices(product) : { priceUSD: 0, priceBS: 0, profitUSD: 0 };
@@ -1920,42 +2042,44 @@
                          id: item.id,
                          name: item.name,
                          quantity: item.quantity,
-                         pricesAtSale: pricesAtSale, // Store calculated prices at the time of sale (includes profit)
-                         costUSD: product ? product.costUSD : 0 // Also store cost at time of sale for profit calculation in reports
+                         pricesAtSale: pricesAtSale,
+                         costUSD: product ? product.costUSD : 0
                      };
                  }),
                  totalUSD: currentBillTotalUSD,
                  totalBS: currentBillTotalBS,
                  paymentMethod: method,
-                 receivedUSD_customer: receivedUSD_customer, // Amount customer physically gave in USD
-                 receivedBS_customer: receivedBS_customer,   // Amount customer physically gave in VES
-                 changeGivenUSD: changeGivenUSD,             // Change given back in USD (ensure integer for display if needed)
-                 changeGivenBS: Math.round(changeGivenBS),   // Change given back in VES (ensure integer)
-                 exchangeRate: AppState.exchangeRate         // Exchange rate at the time of sale
+                 receivedUSD_customer: receivedUSD_customer,
+                 receivedBS_customer: receivedBS_customer,
+                 changeGivenUSD: changeGivenUSD,
+                 changeGivenBS: Math.round(changeGivenBS),
+                 exchangeRate: AppState.exchangeRate
              };
-
              AppState.sales.push(sale);
-             AppState.currentBill = []; // Clear the current bill
+             AppState.currentBill = [];
              saveData();
-
-             // --- Update UI ---
-             updateBillDisplay(); // Update bill display (will show empty)
-             renderSales(salesFilterSelect.value); // Update sales history with current filter
-             renderProducts(productSearchInput.value); // Update product stock display (already updated during bill modification)
-
-             paymentModal.hide(); // Hide the payment modal
+             updateBillDisplay();
+             renderSales(salesFilterSelect.value);
+             renderProducts(productSearchInput.value);
+             paymentModal.hide();
              showMessage("Factura procesada con éxito!", 'success');
         });
 
 
-        // Enables/Disables the "Procesar Factura" button based on whether the bill has items
+        /**
+         * Enables or disables the "Procesar Factura" button based on whether
+         * the current bill has items.
+         */
         function checkBillAndToggleFacturarButton() {
              processBillButton.disabled = AppState.currentBill.length === 0;
         }
 
         // --- Sale Detail Logic ---
 
-        // Displays details of a specific sale in a modal (triggered by card click)
+        /**
+         * Displays the details of a specific sale in the sale detail modal.
+         * @param {string} saleDateISOString - The ISO date string identifier of the sale.
+         */
         window.viewSaleDetail = function(saleDateISOString) {
             const sale = AppState.sales.find(s => s.date === saleDateISOString);
             if (!sale) {
@@ -1963,32 +2087,19 @@
                 showMessage("Error: Venta no encontrada.", 'danger');
                 return;
             }
-
-            // Populate modal fields
-            saleDetailDateSpan.textContent = new Date(sale.date).toLocaleString('es-VE'); // Format date/time
+            saleDetailDateSpan.textContent = new Date(sale.date).toLocaleString('es-VE');
             saleDetailMethodSpan.textContent = sale.paymentMethod ? sale.paymentMethod.toUpperCase() : 'N/A';
             saleDetailExchangeRateSpan.textContent = sale.exchangeRate ? sale.exchangeRate.toFixed(2) : 'N/A';
-
-            // Display amounts exactly as stored (what customer gave, what change was given)
             saleDetailReceivedCustomerUsdSpan.textContent = `${(sale.receivedUSD_customer || 0).toFixed(0)}$`;
             saleDetailReceivedCustomerBsSpan.textContent = `${(sale.receivedBS_customer || 0).toFixed(0)}Bs`;
-            // Ensure changeGivenBS is displayed as integer
             saleDetailChangeGivenUsdSpan.textContent = `${(sale.changeGivenUSD || 0).toFixed(2)}$`;
             saleDetailChangeGivenBsSpan.textContent = `${Math.round(sale.changeGivenBS || 0).toFixed(0)}Bs`;
-
-
-            // Calculate and display net received
             const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
             const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
-            // Ensure net received BS is displayed as integer
             saleDetailReceivedNetUsdSpan.textContent = `${actualReceivedUSD.toFixed(2)}$`;
             saleDetailReceivedNetBsSpan.textContent = `${Math.round(actualReceivedBS).toFixed(0)}Bs`;
-
             saleDetailTotalUsdSpan.textContent = `${sale.totalUSD.toFixed(2)}$`;
             saleDetailTotalBsSpan.textContent = `${sale.totalBS.toFixed(0)}Bs`;
-
-
-            // Populate item list using prices stored at the time of sale
             saleDetailItemsList.innerHTML = sale.items.map(item => {
                 const itemTotalUSD = (item.pricesAtSale?.priceUSD || 0) * item.quantity;
                 const itemTotalBS = (item.pricesAtSale?.priceBS || 0) * item.quantity;
@@ -1999,15 +2110,15 @@
                     </li>
                 `;
             }).join('');
-
-            // Store the sale date on the delete button for easy access
             deleteSaleFromModalButton.dataset.saleDate = sale.date;
-
-
-            saleDetailModal.show(); // Show the modal
+            saleDetailModal.show();
         };
 
-         // Deletes a sale and returns items to stock (called from modal or directly)
+         /**
+          * Deletes a sale record after confirmation.
+          * Returns the sold items back to the inventory stock.
+          * @param {string} saleDateISOString - The ISO date string identifier of the sale to delete.
+          */
         window.deleteSale = function(saleDateISOString) {
             const saleIndex = AppState.sales.findIndex(s => s.date === saleDateISOString);
             if (saleIndex === -1) {
@@ -2015,57 +2126,59 @@
                 showMessage("Error: Venta no encontrada para eliminar.", 'danger');
                 return;
             }
-
             if (confirm(`¿Estás seguro de que deseas eliminar esta venta (${new Date(saleDateISOString).toLocaleString()})? Los productos serán devueltos al inventario.`)) {
-                const deletedSale = AppState.sales.splice(saleIndex, 1)[0]; // Remove and get the sale
-
-                // Return items to stock
+                const deletedSale = AppState.sales.splice(saleIndex, 1)[0];
                 deletedSale.items.forEach(item => {
                     const product = AppState.products.find(p => p.id === item.id);
                     if (product) {
                         product.stock += item.quantity;
                     } else {
-                        console.warn(`Producto con ID ${item.id} no encontrado en el inventario al eliminar la venta. No se pudo devolver el stock.`);
-                        // Optionally log this or show a specific message
-                         showMessage(`Advertencia: Producto "${item.name}" no encontrado en inventario. No se pudo devolver el stock.`, 'warning');
+                        console.warn(`Producto con ID ${item.id} (${item.name}) no encontrado en el inventario al eliminar la venta. No se pudo devolver el stock.`);
+                        showMessage(`Advertencia: Producto "${item.name}" no encontrado en inventario. No se pudo devolver el stock.`, 'warning');
                     }
                 });
-
                 saveData();
-                renderSales(salesFilterSelect.value); // Re-render sales history with current filter
-                renderProducts(productSearchInput.value); // Update product stock display
+                renderSales(salesFilterSelect.value);
+                renderProducts(productSearchInput.value);
                 showMessage("Venta eliminada y stock devuelto.", 'success');
-                saleDetailModal.hide(); // Hide the modal after deletion
+                saleDetailModal.hide();
             }
         };
 
         // Event listener for the delete button inside the sale detail modal
         deleteSaleFromModalButton.addEventListener('click', () => {
-            const saleDate = deleteSaleFromModalButton.dataset.saleDate; // Get date from data attribute
+            const saleDate = deleteSaleFromModalButton.dataset.saleDate;
             if (saleDate) {
-                deleteSale(saleDate); // Call the delete function
+                deleteSale(saleDate);
             }
         });
 
 
         // --- Data Export Functions ---
 
-        // Helper function to escape CSV fields that contain commas or quotes
+        /**
+         * Escapes a field for CSV format by handling commas, quotes, and newlines.
+         * @param {*} field - The data field to escape.
+         * @returns {string} The CSV-escaped string.
+         */
         function escapeCsvField(field) {
-            if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
-                // Replace double quotes with two double quotes, then wrap in double quotes
-                return `"${field.replace(/"/g, '""')}"`;
-            }
-             // Convert numbers to string and handle potential null/undefined
             if (field === null || field === undefined) return '';
-            return String(field);
+            const stringField = String(field);
+            if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+                return `"${stringField.replace(/"/g, '""')}"`;
+            }
+            return stringField;
         }
 
-        // Generates and downloads a CSV file
+        /**
+         * Generates a CSV file from content and triggers a download.
+         * @param {string} csvContent - The complete CSV content as a string.
+         * @param {string} filename - The desired name for the downloaded file.
+         */
         function downloadCsv(csvContent, filename) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            if (link.download !== undefined) { // Feature detection
+            if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
                 link.setAttribute('download', filename);
@@ -2073,98 +2186,70 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url); // Clean up
+                URL.revokeObjectURL(url);
             } else {
-                // Fallback for browsers that don't support download attribute
                 showMessage("Tu navegador no soporta la descarga automática. Por favor, copia el contenido manualmente.", 'warning');
-                console.log(csvContent); // Log content to console
+                console.log("--- Contenido CSV ---");
+                console.log(csvContent);
+                console.log("--- Fin Contenido CSV ---");
             }
         }
 
-        // Exports sales data to CSV based on the currently applied filter date
+        /**
+         * Exports sales data to a CSV file based on the currently selected filter.
+         * Calculates profit for each sale row.
+         */
         exportSalesButton.addEventListener('click', () => {
              const filterType = salesFilterSelect.value;
              let salesToExport = [];
              const now = new Date();
              now.setHours(0, 0, 0, 0);
-
-             // Re-apply filter logic to get the correct sales subset for export
              switch (filterType) {
                 case 'today':
-                    salesToExport = AppState.sales.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        saleDate.setHours(0, 0, 0, 0);
-                        return saleDate.getTime() === now.getTime();
-                    });
+                    salesToExport = AppState.sales.filter(sale => { const d = new Date(sale.date); d.setHours(0,0,0,0); return d.getTime() === now.getTime(); });
                     break;
                 case 'yesterday':
-                    const yesterday = new Date(now);
-                    yesterday.setDate(now.getDate() - 1);
-                     salesToExport = AppState.sales.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        saleDate.setHours(0, 0, 0, 0);
-                        return saleDate.getTime() === yesterday.getTime();
-                    });
+                    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+                    salesToExport = AppState.sales.filter(sale => { const d = new Date(sale.date); d.setHours(0,0,0,0); return d.getTime() === yesterday.getTime(); });
                     break;
                 case 'this-week':
-                    const firstDayOfWeek = new Date(now);
-                    firstDayOfWeek.setDate(now.getDate() - now.getDay()); // Adjust to Sunday (or Monday)
-                     firstDayOfWeek.setHours(0, 0, 0, 0);
-                     salesToExport = AppState.sales.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        return saleDate >= firstDayOfWeek;
-                    });
+                    const firstDayOfWeek = new Date(now); firstDayOfWeek.setDate(now.getDate() - now.getDay()); firstDayOfWeek.setHours(0,0,0,0);
+                    salesToExport = AppState.sales.filter(sale => new Date(sale.date) >= firstDayOfWeek);
                     break;
                 case 'this-month':
-                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                     firstDayOfMonth.setHours(0, 0, 0, 0);
-                     salesToExport = AppState.sales.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        return saleDate >= firstDayOfMonth;
-                    });
+                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); firstDayOfMonth.setHours(0,0,0,0);
+                    salesToExport = AppState.sales.filter(sale => new Date(sale.date) >= firstDayOfMonth);
                     break;
                  case 'this-year':
-                    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-                     firstDayOfYear.setHours(0, 0, 0, 0);
-                     salesToExport = AppState.sales.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        return saleDate >= firstDayOfYear;
-                    });
+                    const firstDayOfYear = new Date(now.getFullYear(), 0, 1); firstDayOfYear.setHours(0,0,0,0);
+                    salesToExport = AppState.sales.filter(sale => new Date(sale.date) >= firstDayOfYear);
                     break;
                 case 'all':
                 default:
                     salesToExport = AppState.sales;
                     break;
              }
-
-
             if (salesToExport.length === 0) {
                 showMessage("No hay ventas para exportar en el período seleccionado.", 'info');
                 return;
             }
-
             const header = [
                 "Fecha", "Productos", "Cantidad Total", "Total Venta ($)", "Total Venta (Bs)",
                 "Método de Pago", "Tasa Cambio", "Recibido Cliente ($)", "Recibido Cliente (Bs)",
                 "Vuelto Entregado ($)", "Vuelto Entregado (Bs)", "Recibido Neto ($)", "Recibido Neto (Bs)",
-                "Ganancia Estimada ($)" // Added profit column
+                "Ganancia Estimada ($)"
             ];
-
             const rows = salesToExport.map(sale => {
-                 const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; "); // Use semicolon for item separation within cell
+                 const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; ");
                  const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
                  const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                  const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
-
-                 // Calculate profit for this sale row
                  let saleProfitUSD = 0;
                  sale.items.forEach(item => {
-                     const itemCostUSD = item.costUSD !== undefined ? item.costUSD : (AppState.products.find(p => p.id === item.id)?.costUSD || 0);
+                     const itemCostUSD = item.costUSD !== undefined ? item.costUSD : 0;
                      const itemSalePriceUSD = item.pricesAtSale?.priceUSD || 0;
                      saleProfitUSD += (itemSalePriceUSD - itemCostUSD) * item.quantity;
                  });
-
-
                 return [
                     escapeCsvField(new Date(sale.date).toLocaleString('es-VE')),
                     escapeCsvField(itemsSummary),
@@ -2179,12 +2264,11 @@
                     escapeCsvField(Math.round(sale.changeGivenBS || 0).toFixed(0)),
                     escapeCsvField(actualReceivedUSD.toFixed(2)),
                     escapeCsvField(Math.round(actualReceivedBS).toFixed(0)),
-                    escapeCsvField(saleProfitUSD.toFixed(2)) // Add profit to CSV row
+                    escapeCsvField(saleProfitUSD.toFixed(2))
                 ].join(',');
             });
-
             const csvContent = [header.join(','), ...rows].join('\n');
-            const filename = `ventas_papeleria_export_${filterType || 'todas'}_${new Date().toISOString().slice(0,10)}.csv`; // Dynamic filename
+            const filename = `ventas_papeleria_${filterType || 'todas'}_${new Date().toISOString().slice(0,10)}.csv`;
             downloadCsv(csvContent, filename);
             showMessage("Ventas exportadas a CSV.", 'success');
         });
@@ -2192,100 +2276,99 @@
 
         // --- CSV Import Functionality ---
 
-        // Enable the import button when a file is selected
+        // Enable the import button only when a file is selected
         csvFileInput.addEventListener('change', (event) => {
-            if (event.target.files.length > 0) {
-                importCsvButton.disabled = false;
-            } else {
-                importCsvButton.disabled = true;
-            }
+            importCsvButton.disabled = !(event.target.files.length > 0);
         });
 
-        // Handle the CSV import button click
+        // Handle the CSV import button click: read the selected file
         importCsvButton.addEventListener('click', () => {
             const file = csvFileInput.files[0];
             if (!file) {
                 showMessage("Por favor, selecciona un archivo CSV.", 'warning');
                 return;
             }
-
             const reader = new FileReader();
-
             reader.onload = (event) => {
                 const csvContent = event.target.result;
                 processCsvData(csvContent);
             };
-
             reader.onerror = () => {
                 showMessage("Error al leer el archivo CSV.", 'danger');
             };
-
-            reader.readAsText(file); // Read the file as text
+            reader.readAsText(file);
         });
 
-        // Process the CSV data
+        /**
+         * Processes the content of an imported CSV file.
+         * Assumes format: "Nombre,Costo,Existencia[,Margen%]" (Margin is optional).
+         * Adds new products or updates existing ones based on name matching.
+         * @param {string} csvContent - The text content of the CSV file.
+         */
         function processCsvData(csvContent) {
-            const lines = csvContent.split('\n').filter(line => line.trim() !== ''); // Split into lines and remove empty ones
+            const lines = csvContent.split('\n')
+                                    .map(line => line.trim())
+                                    .filter(line => line !== '');
+            if (lines.length === 0) {
+                showMessage("El archivo CSV está vacío o no tiene datos válidos.", 'info');
+                return;
+            }
+            if (lines[0].toLowerCase().includes('nombre') && lines[0].toLowerCase().includes('costo')) {
+                console.log("Cabecera detectada, saltando primera fila.");
+                lines.shift();
+            }
             let addedCount = 0;
             let updatedCount = 0;
             let skippedCount = 0;
-
-            if (lines.length === 0) {
-                showMessage("El archivo CSV está vacío.", 'info');
-                return;
-            }
-
-            // Simple CSV parsing: assuming format "Nombre,Costo,Existencia"
             lines.forEach((line, index) => {
                 const columns = line.split(',');
-
-                // Basic validation: check if there are 3 columns
-                if (columns.length !== 3) {
-                    console.warn(`Fila ${index + 1} saltada: Número incorrecto de columnas (${columns.length}).`);
+                if (columns.length < 3) {
+                    console.warn(`Fila ${index + 1} saltada: Número insuficiente de columnas (${columns.length}). Se requieren al menos Nombre, Costo, Existencia.`);
                     skippedCount++;
-                    return; // Skip this row
+                    return;
                 }
-
                 const name = columns[0].trim();
-                const costUSD = parseFloat(columns[1].trim());
-                const stock = parseInt(columns[2].trim());
-
-                // Validate data types and values
+                const costUSDText = columns[1].trim();
+                const stockText = columns[2].trim();
+                const marginPercentText = (columns.length >= 4) ? columns[3].trim() : '';
+                const costUSD = parseFloat(costUSDText);
+                const stock = parseInt(stockText);
                 if (!name || isNaN(costUSD) || isNaN(stock) || costUSD < 0 || stock < 0) {
-                     console.warn(`Fila ${index + 1} saltada: Datos inválidos (Nombre: "${name}", Costo: ${columns[1]}, Stock: ${columns[2]}).`);
+                     console.warn(`Fila ${index + 1} saltada: Datos inválidos (Nombre: "${name}", Costo: "${costUSDText}", Stock: "${stockText}").`);
                     skippedCount++;
-                    return; // Skip this row
+                    return;
                 }
-
-                // Check if product with the same name already exists (case-insensitive)
+                let profitMargin = DEFAULT_PROFIT_MARGIN;
+                if (marginPercentText !== '') {
+                    const marginPercent = parseFloat(marginPercentText);
+                    if (!isNaN(marginPercent) && marginPercent >= 0) {
+                        profitMargin = marginPercent / 100;
+                    } else {
+                        console.warn(`Fila ${index + 1}: Margen inválido ("${marginPercentText}"). Usando margen por defecto (${(DEFAULT_PROFIT_MARGIN * 100).toFixed(0)}%).`);
+                    }
+                }
                 const existingProductIndex = AppState.products.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-
                 if (existingProductIndex !== -1) {
-                    // Product exists, update cost and stock
                     AppState.products[existingProductIndex].costUSD = costUSD;
                     AppState.products[existingProductIndex].stock = stock;
+                    AppState.products[existingProductIndex].profitMargin = profitMargin;
                     updatedCount++;
                 } else {
-                    // Product does not exist, add as new
                     const newProduct = {
-                        id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, // Unique ID
+                        id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
                         name: name,
                         costUSD: costUSD,
                         stock: stock,
+                        profitMargin: profitMargin,
                     };
                     AppState.products.push(newProduct);
                     addedCount++;
                 }
             });
-
-            AppState.products.sort((a, b) => a.name.localeCompare(b.name)); // Keep products sorted
+            AppState.products.sort((a, b) => a.name.localeCompare(b.name));
             saveData();
-            renderProducts(productSearchInput.value); // Re-render UI
-
-            // Show summary message
+            renderProducts(productSearchInput.value);
             showMessage(`Importación de CSV completada: ${addedCount} productos añadidos, ${updatedCount} productos actualizados, ${skippedCount} filas saltadas.`, 'success');
-
-            // Reset file input
             csvFileInput.value = '';
             importCsvButton.disabled = true;
         }
@@ -2293,53 +2376,56 @@
 
         // --- General Event Listeners ---
 
-        // Updates exchange rate and recalculates prices when input changes
+        /**
+         * Updates the global exchange rate when the input changes.
+         * Recalculates prices across the application and saves the state.
+         */
         exchangeRateInput.addEventListener("input", (e) => {
           const newRate = parseFloat(e.target.value);
           if (!isNaN(newRate) && newRate > 0) {
             AppState.exchangeRate = newRate;
             saveData();
-            // Re-render affected parts of the UI
             renderProducts(productSearchInput.value);
             updateBillDisplay();
-            renderSales(salesFilterSelect.value); // Re-render sales with current filter
-            // No need to re-render cash closing report automatically, user will generate it
-            showMessage("Tasa de cambio actualizada.", 'info', 3000); // Short duration message
+            renderSales(salesFilterSelect.value);
+            updatePricesFromMargin(productCostInput, productMarginInput, productSalePriceBsInput, productSalePriceUsdInput);
+            if (editProductModalElement.classList.contains('show')) {
+                updatePricesFromMargin(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput);
+            }
+            // REMOVED the showMessage call for exchange rate update
+            // showMessage("Tasa de cambio actualizada.", 'info', 3000);
           } else {
-              // Provide feedback without alert if possible, maybe input validation styling
-              // console.warn("Tasa de cambio inválida ingresada.");
-              // Optionally reset to the last valid rate if input becomes invalid
-              // e.target.value = AppState.exchangeRate.toFixed(2);
-              showMessage("Por favor, ingresa una tasa de cambio válida.", 'warning', 3000);
+              showMessage("Por favor, ingresa una tasa de cambio válida (número positivo).", 'warning', 3000);
           }
         });
-         // Prevent non-numeric input in exchange rate
+         // Prevent non-numeric characters (except '.') in the exchange rate input
          exchangeRateInput.addEventListener("keypress", (e) => {
-            if (!/[0-9.]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+            if (!/[0-9.]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
                 e.preventDefault();
+            }
+            if (e.key === '.' && e.target.value.includes('.')) {
+                 e.preventDefault();
             }
         });
 
 
-        // Filters the product list on the Home tab as the user types
+        // Filters the product list on the Home tab as the user types in the search box
         productSearchInput.addEventListener('input', (e) => {
             renderProducts(e.target.value);
         });
 
-        // Filters the sales history when the filter select changes
+        // Filters the sales history when the filter dropdown selection changes
         salesFilterSelect.addEventListener('change', (e) => {
             renderSales(e.target.value);
             showMessage(`Filtro de ventas cambiado a "${e.target.options[e.target.selectedIndex].text}".`, 'info', 3000);
         });
 
-        // Toggle the floating chart panel
+        // Toggle the visibility of the floating chart panel
         toggleChartPanelButton.addEventListener('click', () => {
             chartFloatingPanel.classList.toggle('show');
-            // If the panel is shown, update the chart
             if (chartFloatingPanel.classList.contains('show')) {
-                 renderSales(salesFilterSelect.value); // This will trigger chart update if visible
+                 renderSales(salesFilterSelect.value);
             } else {
-                 // Destroy chart when hidden
                  if (topProductsChart) {
                      topProductsChart.destroy();
                      topProductsChart = null;
@@ -2347,10 +2433,9 @@
             }
         });
 
-        // Close button for the floating chart panel
+        // Close button functionality for the floating chart panel
          chartPanelCloseButton.addEventListener('click', () => {
             chartFloatingPanel.classList.remove('show');
-             // Destroy chart when hidden
              if (topProductsChart) {
                  topProductsChart.destroy();
                  topProductsChart = null;
@@ -2358,34 +2443,36 @@
          });
 
 
-        // Clears all data from localStorage after confirmation
+        /**
+         * Clears all application data (products, sales, bill) from localStorage
+         * after double confirmation. Resets the application state and UI.
+         */
         if (clearStorageButton) {
             clearStorageButton.addEventListener('click', () => {
                 if (confirm('ADVERTENCIA: ¿Estás ABSOLUTAMENTE seguro de que deseas eliminar TODOS los datos (productos, ventas, factura actual)? Esta acción es irreversible.')) {
                     if (confirm('CONFIRMACIÓN FINAL: Eliminar todos los datos permanentemente.')) {
                         localStorage.clear();
-                        // Reset AppState in memory to default
                         AppState = {
                             products: [],
                             sales: [],
                             currentBill: [],
-                            exchangeRate: 85.40, // Reset to default rate
+                            exchangeRate: 85.40,
                         };
-                        // Re-render the entire UI to reflect the empty state
                         renderProducts();
                         renderSales();
                         updateBillDisplay();
                         exchangeRateInput.value = AppState.exchangeRate.toFixed(2);
-                        productSearchInput.value = ''; // Clear search
-                        salesFilterSelect.value = 'all'; // Reset sales filter
-                        // Destroy chart if it exists
+                        productSearchInput.value = '';
+                        salesFilterSelect.value = 'all';
                         if(topProductsChart) {
                            topProductsChart.destroy();
                            topProductsChart = null;
                         }
-                         // Hide the floating chart panel on clear data
                          chartFloatingPanel.classList.remove('show');
-
+                         newProductForm.reset();
+                         productSalePriceBsInput.value = '';
+                         productSalePriceUsdInput.value = '';
+                         productMarginInput.value = (DEFAULT_PROFIT_MARGIN * 100).toFixed(2);
                         showMessage('Todos los datos han sido eliminados permanentemente.', 'success');
                     }
                 }
@@ -2394,52 +2481,50 @@
 
         // --- Event Delegation for Clickable Rows/Cards ---
 
-        // Event listener for clicks on the product lists (Home and Products tabs)
-        // Use event delegation on the tbody
+        // Use event delegation on the tbody elements for product row clicks
         productsListTbody.addEventListener('click', handleProductRowClick);
         managementListTbody.addEventListener('click', handleProductRowClick);
 
+        /**
+         * Handles clicks within the product list tables (Home and Products tabs).
+         * If a row (not the 'Add' button) is clicked, it opens the edit modal for that product.
+         * @param {Event} event - The click event object.
+         */
         function handleProductRowClick(event) {
-            // Find the closest row (<tr>) that was clicked
             const row = event.target.closest('tr.clickable-row');
             if (row) {
-                const productId = row.dataset.id; // Get the product ID from the data attribute
-                 // Check if the click was on the "Agregar" button in the home tab
+                const productId = row.dataset.id;
                 const addButton = event.target.closest('button.btn-primary');
                  if (addButton && row.parentElement.id === 'products-list') {
-                     // If it was the add button in the home list, let that click handler run
-                     // The onclick attribute on the button will handle this
                      return;
                  }
-
-                // Otherwise, open the edit modal
                 if (productId) {
-                    editProduct(productId); // Call the edit function
+                    editProduct(productId);
                 }
             }
         }
 
 
-        // Event listener for clicks on the sales history list (Sales tab)
-        // Use event delegation on the sales history list div
+        // Use event delegation on the sales history list container for card clicks
         salesHistoryListDiv.addEventListener('click', (event) => {
-            // Find the closest sale item card (div.sale-item-card) that was clicked
             const saleCard = event.target.closest('.sale-item-card');
             if (saleCard) {
-                const saleDate = saleCard.dataset.date; // Get the sale date from the data attribute
+                const saleDate = saleCard.dataset.date;
                 if (saleDate) {
-                    viewSaleDetail(saleDate); // Call the view sale detail function
+                    viewSaleDetail(saleDate);
                 }
             }
         });
 
 
         // --- Initial Application Load ---
-        loadData(); // Load data from localStorage
-        renderProducts(); // Render initial product lists
-        renderSales(salesFilterSelect.value); // Render initial sales history with default filter ('all')
-        updateBillDisplay(); // Render initial bill state
-        checkBillAndToggleFacturarButton(); // Set initial state of the process button
+        loadData();
+        renderProducts();
+        renderSales(salesFilterSelect.value);
+        updateBillDisplay();
+        checkBillAndToggleFacturarButton();
+        updatePricesFromMargin(productCostInput, productMarginInput, productSalePriceBsInput, productSalePriceUsdInput);
+
 
       }); // End DOMContentLoaded
     </script>
