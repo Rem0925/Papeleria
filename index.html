@@ -2235,7 +2235,7 @@
                 "Ganancia Estimada ($)"
             ];
             const rows = salesToExport.map(sale => {
-                 const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; ");
+                 const itemsSummary = sale.items.map(item => `${item.name} (x${item.quantity})`).join(' | ');
                  const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
                  const actualReceivedUSD = (sale.receivedUSD_customer || 0) - (sale.changeGivenUSD || 0);
                  const actualReceivedBS = (sale.receivedBS_customer || 0) - (sale.changeGivenBS || 0);
@@ -2387,8 +2387,6 @@
             if (editProductModalElement.classList.contains('show')) {
                 updatePricesFromMargin(editProductCostInput, editProductMarginInput, editProductSalePriceBsInput, editProductSalePriceUsdInput);
             }
-            // REMOVED the showMessage call for exchange rate update
-            // showMessage("Tasa de cambio actualizada.", 'info', 3000);
           } else {
               showMessage("Por favor, ingresa una tasa de cambio válida (número positivo).", 'warning', 3000);
           }
